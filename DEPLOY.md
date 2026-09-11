@@ -18,7 +18,7 @@ Railway上では**2つの別サービス**として同じリポジトリから�
    - `DJANGO_DEBUG` … `False`
    - `DJANGO_ALLOWED_HOSTS` … `*`（お試し版なので簡略化。絞る場合はRailwayが割り当てるドメインを指定）
    - `CORS_ALLOWED_ORIGINS` … 一旦 `http://localhost:5173` のままで良い（フロントエンドのURLが分かったらStep 3で更新）
-4. デプロイ実行。`Procfile`（`backend/Procfile`）がmigrate→collectstatic→gunicorn起動まで自動で行う
+4. デプロイ実行。`backend/railway.toml`が`backend/deploy.sh`を起動コマンドに指定しており、migrate→collectstatic→gunicorn起動まで自動で行う（project0310のRailway構成を参考にした構成）
 5. デプロイ完了後、割り当てられたURL（例: `https://xxxxx.up.railway.app`）を控える
 6. デモ用アカウントを作成する（Railwayのシェル機能 or ローカルから接続して）：
    ```bash
@@ -53,6 +53,6 @@ Railway上では**2つの別サービス**として同じリポジトリから�
 - ICカードリーダー連携（`tools/rcs380_bridge/`）はローカルPCに物理リーダーを接続する用途のため、Railway上のデモでは動作しない。デモではQRコード/PIN入力での入退室を見せる想定
 
 ## 関連ファイル
-- [backend/Procfile](backend/Procfile)
+- [backend/railway.toml](backend/railway.toml) / [backend/deploy.sh](backend/deploy.sh)
 - [frontend/Procfile](frontend/Procfile)
 - [backend/config/settings.py](backend/config/settings.py)（環境変数対応箇所）
