@@ -1,0 +1,46 @@
+:root {
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9fafb;
+  --color-border: #e2e4e9;
+  --color-text: #1a1d24;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9aa1ac;
+
+  --color-primary: #2f5aff;
+  --color-primary-hover: #2447d9;
+  --color-primary-soft: #eaefff;
+
+  --color-success: #12875a;
+  --color-success-bg: #e5f7ee;
+  --color-success-strong: #16a35f;
+
+  --color-danger: #d13c3c;
+  --color-danger-bg: #fdecec;
+  --color-danger-strong: #e13d3d;
+
+  --color-warning-bg: #fff6e5;
+  --color-warning-text: #92650a;
+
+  --font-sans: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', system-ui, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.12);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}

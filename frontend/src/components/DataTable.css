@@ -1,0 +1,113 @@
+.data-table__wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.data-table thead th {
+  text-align: left;
+  padding: 12px 16px;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--color-surface-muted);
+}
+
+.data-table__empty {
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-faint);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+}
+
+/* スマホ幅では横スクロールなしで確認できるよう、1件あたり3列×2行程度の
+   カード状グリッドに組み替える（最終列＝操作ボタン列は全幅で最下段に表示） */
+@media (max-width: 640px) {
+  .data-table__wrapper--mobile-compact {
+    overflow-x: visible;
+    border: none;
+    background: none;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table {
+    display: block;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table thead {
+    display: none;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px var(--space-3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody td {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0;
+    border: none;
+    min-width: 0;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--color-text-faint);
+    letter-spacing: 0.03em;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody td:last-child {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .data-table__wrapper--mobile-compact .data-table tbody td:last-child::before {
+    content: none;
+  }
+}
