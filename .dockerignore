@@ -1,0 +1,13 @@
+.git
+backend/venv
+backend/db.sqlite3
+backend/staticfiles
+**/__pycache__
+**/*.pyc
+frontend/node_modules
+frontend/dist
+**/.env
+tools/rcs380_bridge/venv
+/README.md
+/HANDOFF.md
+/DEPLOY.md
