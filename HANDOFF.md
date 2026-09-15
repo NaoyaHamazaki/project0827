@@ -32,21 +32,28 @@
 # バックエンド
 cd backend
 .\venv\Scripts\activate
-python manage.py runserver 127.0.0.1:8000
+python manage.py runserver 127.0.0.1:8827
 
 # フロントエンド（別ターミナル）
 cd frontend
 npm run dev
 ```
 
-`http://localhost:5173` を開く。
+`http://localhost:5827` を開く。
+
+**注意（ポート固定について）**: このPC上には他プロジェクト（project0310, project0911等）の
+開発サーバーも動いていることがあり、よくある既定値（8000/5173）を使うと衝突して
+「別プロジェクトの画面が開いてしまう」事故が起きたことがある。そのため
+project0827は8827/5827に固定し、`vite.config.js`で`strictPort: true`にして
+ポート衝突時は黙って別ポートにずれずエラーにするようにしてある
+（`start_app.bat`等の`.bat`ファイルにもポート使用中チェックを追加済み）。
 
 ### スマホ実機で確認する（ngrok経由）2ステップ
 
 1. `backend\start_server.bat` を実行（venv作成・依存インストール・migrate・
-   `runserver 127.0.0.1:8000` を自動実行）
+   `runserver 127.0.0.1:8827` を自動実行）
 2. 別途 `backend\start_ngrok_and_notify.bat` を実行
-   （バックエンドは起動済み前提。フロントエンド起動→ngrokで`http://localhost:5173`を
+   （バックエンドは起動済み前提。フロントエンド起動→ngrokで`http://localhost:5827`を
    トンネル→ `tools/ngrok_tunnel/notify_ngrok_url.py` がトンネルURLとQRコード画像を
    LINEに送信）
 
@@ -182,12 +189,12 @@ members/orgsettings各アプリ）。
 - Windowsは`http.server`等のデフォルト設定（`allow_reuse_address=True`）で、既にLISTEN中の
   ポートにも二重bindできてしまう（POSIXと挙動が異なる）。開発サーバーが複数プロセス
   起動したまま停止し忘れると、古いプロセスが応答して混乱の原因になる。動作確認前に
-  `netstat -ano | findstr :8000`等でポート使用状況を確認し、不要なプロセスは
+  `netstat -ano | findstr :8827`等でポート使用状況を確認し、不要なプロセスは
   `taskkill //F //PID <pid>`で停止すること
 - Claude_Browserツールの`preview_start {name}`は`.claude/launch.json`を**プロジェクトルート
   ではなく親作業ディレクトリ（`C:\Users\right\OneDrive\Desktop\Python`）**から読む。
   `project0827-frontend`という名前で登録済み（`npm --prefix project0827/frontend run dev`,
-  port 5173）
+  port 5827）
 - 会員の`card_identifier`（カードID）は単なる一意文字列で長さ・形式の制限なし。IC/バーコード
   の実際のIDだけでなく、短い手入力コード（例:カード裏の3桁番号）もそのまま使える
 

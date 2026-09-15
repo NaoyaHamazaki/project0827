@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 本番は1サービス構成（Djangoが同一オリジンでAPIも画面も配信する）ため、
 // 相対パスを既定値にする。開発時はVite側のプロキシ設定（vite.config.js）が
-// /api を http://127.0.0.1:8000 に転送する。
+// /api を http://127.0.0.1:8827 に転送する。
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 const TOKEN_KEY = 'reception_auth_tokens'

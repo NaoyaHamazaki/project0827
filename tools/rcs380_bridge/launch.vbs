@@ -17,4 +17,4 @@ shell.Run """" & baseDir & "\venv\Scripts\pythonw.exe"" """ & baseDir & "\agent.
 WScript.Sleep 1500
 
 ' 受付スキャン画面をブラウザで開く（本番運用時は実際のURLに変更する）
-shell.Run "http://localhost:5173/", 1, False
+shell.Run "http://localhost:5827/", 1, False

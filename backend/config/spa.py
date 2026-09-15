@@ -5,7 +5,7 @@
 ここで受けて index.html を返す。あとはブラウザ側の React Router がURLを見て
 表示するページを切り替える（いわゆる SPA の catch-all ルーティング）。
 
-ローカル開発では Vite の dev サーバー（5173番）を直接使うのでこのビューは使われない。
+ローカル開発では Vite の dev サーバー（5827番）を直接使うのでこのビューは使われない。
 """
 
 from django.conf import settings

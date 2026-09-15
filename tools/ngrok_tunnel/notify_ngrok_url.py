@@ -3,7 +3,7 @@ project0827（受付・入退室管理システム）を ngrok でスマホ公�
 発行された公開URLとQRコードをLINE Botで通知するスクリプト。
 
 前提:
-- ngrok がフロントエンド（Vite, 5173番）のみをトンネルしていること
+- ngrok がフロントエンド（Vite, 5827番）のみをトンネルしていること
   （バックエンドAPIへのアクセスは frontend/vite.config.js の server.proxy 経由で中継される）
 - ngrok のローカル管理API（http://127.0.0.1:4040）が有効であること
 
@@ -33,7 +33,7 @@ QR_OUTPUT_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "frontend", 
 
 
 def get_ngrok_https_url(retries=15, delay=1):
-    """ngrokのローカル管理APIから、フロントエンド(5173)向けのhttps公開URLを取得する"""
+    """ngrokのローカル管理APIから、フロントエンド(5827)向けのhttps公開URLを取得する"""
     last_error = None
     for _ in range(retries):
         try:

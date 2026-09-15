@@ -16,7 +16,7 @@ python -m venv venv
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_demo    # デモ用の管理者/受付ユーザーと会員を投入
-python manage.py runserver 127.0.0.1:8000
+python manage.py runserver 127.0.0.1:8827
 ```
 
 デモアカウント（`seed_demo` 実行後）:
@@ -33,7 +33,9 @@ npm install
 npm run dev
 ```
 
-`http://localhost:5173` を開く。API接続先は `.env.development`（`VITE_API_BASE_URL`）で設定済み（`http://127.0.0.1:8000/api`）。
+`http://localhost:5827` を開く。API接続先は `.env.development`（`VITE_API_BASE_URL`）で設定済み（`/api`、Viteのプロキシ経由で`http://127.0.0.1:8827`に転送される）。
+
+**注意**: このPCで他プロジェクトの開発サーバーも動かしている場合、ポート8000/5173（よくある既定値）と衝突しないよう、このプロジェクトは意図的に8827/5827を使っている（`vite.config.js`の`strictPort: true`により、ポートが使用中の場合は黙って別ポートにずれず、はっきりエラーになる）。
 
 ## 主要機能
 

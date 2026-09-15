@@ -68,10 +68,10 @@ Dockerを使わず、Dockerfileの中でやっていることを手元で直接�
 cd frontend && npm run build && cd ..
 cd backend
 DJANGO_DEBUG=False DJANGO_SECRET_KEY=temp-local-test venv/Scripts/python manage.py collectstatic --noinput
-DJANGO_DEBUG=False DJANGO_SECRET_KEY=temp-local-test venv/Scripts/python manage.py runserver 127.0.0.1:8000
+DJANGO_DEBUG=False DJANGO_SECRET_KEY=temp-local-test venv/Scripts/python manage.py runserver 127.0.0.1:8827
 ```
 
-<http://127.0.0.1:8000/> を開くとフロントエンドが、`/api/...` はAPIが、`/admin/` は管理画面が
+<http://127.0.0.1:8827/> を開くとフロントエンドが、`/api/...` はAPIが、`/admin/` は管理画面が
 同じポートで動く。
 
 ## 注意点
