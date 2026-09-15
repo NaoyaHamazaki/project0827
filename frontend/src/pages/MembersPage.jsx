@@ -5,6 +5,7 @@ import Modal from '../components/Modal'
 import StatusBadge from '../components/StatusBadge'
 import { useLanguage } from '../context/LanguageContext'
 import { useToast } from '../context/ToastContext'
+import { formatDurationHM } from '../utils/duration'
 import {
   createMember,
   deleteMember,
@@ -52,7 +53,7 @@ function MemberUsageModal({ member, onClose }) {
       header: t('退室'),
       render: (row) => (row.is_ongoing ? <span className="members-usage__ongoing">{t('在室中')}</span> : formatDateTime(row.check_out, language)),
     },
-    { key: 'duration_hours', header: t('滞在時間'), render: (row) => `${row.duration_hours}h` },
+    { key: 'duration_hours', header: t('滞在時間'), render: (row) => formatDurationHM(row.duration_hours) },
   ]
 
   return (

@@ -110,35 +110,11 @@ class ScanView(APIView):
                     status=status.HTTP_200_OK,
                 )
         else:
-            # 退室時：貸出中のカードがあれば返却の照合が必要。無ければ従来通りログのみ記録する
+            # 退室時：会員は一度に1枚しか借りられない前提のため、貸出中のカードがあれば
+            # 返却対象は一意に決まる。追加のスキャン・入力を求めず自動的に返却扱いにする。
             active_loan = CardLoan.objects.filter(
                 member=member, returned_at__isnull=True,
             ).select_related('security_card').first()
-
-            if active_loan is not None:
-                if not security_card_number:
-                    return Response(
-                        {
-                            'success': False,
-                            'reason': 'return_card_required',
-                            'member': member_brief,
-                            'log': None,
-                            'expected_security_card': SecurityCardSerializer(active_loan.security_card).data,
-                        },
-                        status=status.HTTP_200_OK,
-                    )
-
-                if security_card_number != active_loan.security_card.card_number:
-                    return Response(
-                        {
-                            'success': False,
-                            'reason': 'card_mismatch',
-                            'member': member_brief,
-                            'log': None,
-                            'expected_security_card': SecurityCardSerializer(active_loan.security_card).data,
-                        },
-                        status=status.HTTP_200_OK,
-                    )
 
         with transaction.atomic():
             log = AccessLog.objects.create(

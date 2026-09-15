@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LogIn as CheckInIcon, LogOut as CheckOutIcon, ArrowRight } from 'lucide-react'
 import { fetchMyHistory } from '../api/access'
 import { useLanguage } from '../context/LanguageContext'
+import { formatDurationHM } from '../utils/duration'
 import './MyHistoryPage.css'
 
 function formatDateTime(isoString, language) {
@@ -99,7 +100,7 @@ export default function MyHistoryPage() {
                       )}
                     </span>
                   </div>
-                  <span className="my-history-session__duration">{session.duration_hours}h</span>
+                  <span className="my-history-session__duration">{formatDurationHM(session.duration_hours)}</span>
                 </li>
               ))}
             </ul>

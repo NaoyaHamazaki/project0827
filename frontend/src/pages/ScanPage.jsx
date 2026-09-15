@@ -228,39 +228,23 @@ function SecurityCardStep({ step, onConfirm, onCancel, isSubmitting }) {
   return (
     <div className="scan-panel scan-card-step">
       <p className="scan-panel__name">{step.memberBrief?.name}</p>
-      {step.mode === 'issue' ? (
-        <>
-          <p className="scan-panel__sub">{t('貸し出すセキュリティカードを選択、またはスキャンしてください')}</p>
-          {step.availableCards?.length > 0 ? (
-            <div className="scan-card-step__list">
-              {step.availableCards.map((card) => (
-                <button
-                  key={card.id}
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => onConfirm(card.card_number)}
-                  disabled={isSubmitting}
-                >
-                  {card.card_number}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="scan-card-step__error">{t('貸出可能なセキュリティカードがありません')}</p>
-          )}
-        </>
+      <p className="scan-panel__sub">{t('貸し出すセキュリティカードを選択、またはスキャンしてください')}</p>
+      {step.availableCards?.length > 0 ? (
+        <div className="scan-card-step__list">
+          {step.availableCards.map((card) => (
+            <button
+              key={card.id}
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => onConfirm(card.card_number)}
+              disabled={isSubmitting}
+            >
+              {card.card_number}
+            </button>
+          ))}
+        </div>
       ) : (
-        <>
-          <p className="scan-panel__sub">
-            {t('返却されたセキュリティカードをスキャン、または番号を入力してください')}
-          </p>
-          {step.expectedCard && (
-            <p className="scan-card-step__expected">
-              {t('貸出中のカード番号')}: <strong>{step.expectedCard.card_number}</strong>
-            </p>
-          )}
-          {step.errorMessage && <p className="scan-card-step__error">{step.errorMessage}</p>}
-        </>
+        <p className="scan-card-step__error">{t('貸出可能なセキュリティカードがありません')}</p>
       )}
       <form className="scan-input scan-card-step__form" onSubmit={handleSubmit}>
         <input
@@ -385,25 +369,10 @@ function AdminScanView() {
 
         if (!response.success && response.reason === 'security_card_required') {
           setPendingCardStep({
-            mode: 'issue',
             cardIdentifier: trimmed,
             method,
             memberBrief: response.member,
             availableCards: response.available_security_cards,
-          })
-          return
-        }
-
-        if (!response.success && (response.reason === 'return_card_required' || response.reason === 'card_mismatch')) {
-          setPendingCardStep({
-            mode: 'return',
-            cardIdentifier: trimmed,
-            method,
-            memberBrief: response.member,
-            expectedCard: response.expected_security_card,
-            errorMessage: response.reason === 'card_mismatch'
-              ? t('カード番号が一致しません。返却されたカードをご確認ください')
-              : '',
           })
           return
         }
@@ -423,7 +392,7 @@ function AdminScanView() {
         refocusInput()
       }
     },
-    [isSubmitting, refocusInput, t]
+    [isSubmitting, refocusInput]
   )
 
   const handleSubmit = (event) => {
