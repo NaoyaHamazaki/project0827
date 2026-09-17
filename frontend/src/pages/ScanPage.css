@@ -566,27 +566,19 @@
   color: var(--color-danger);
 }
 
-.scan-card-step__form {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: 360px;
+.scan-card-step__option {
+  border: 2px solid transparent;
 }
 
-.scan-card-step__form input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface);
-  color: var(--color-text);
-}
-
-.scan-card-step__form input:focus {
-  outline: none;
+.scan-card-step__option.is-selected {
   border-color: var(--color-primary);
+  background-color: var(--color-primary-soft, var(--color-surface));
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.scan-card-step__submit {
+  margin-top: var(--space-2);
 }
 
 .scan-card-step__cancel {

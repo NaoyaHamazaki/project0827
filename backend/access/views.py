@@ -52,6 +52,7 @@ class ScanView(APIView):
         card_identifier = serializer.validated_data['card_identifier']
         method = serializer.validated_data['method']
         security_card_number = serializer.validated_data.get('security_card_number') or ''
+        skip_security_card = serializer.validated_data.get('skip_security_card', False)
 
         member = _resolve_member(card_identifier)
         if member is None:
@@ -81,9 +82,10 @@ class ScanView(APIView):
         )
 
         active_loan = None
+        security_card = None
         if next_type == AccessLog.LogType.CHECK_IN:
-            # 入室時：貸し出すセキュリティカードの選択/スキャンが未確定なら、選べる候補を返して一旦止める
-            if not security_card_number:
+            # 入室時：貸し出すセキュリティカードの選択（またはスキップ）が未確定なら、選べる候補を返して一旦止める
+            if not security_card_number and not skip_security_card:
                 available_cards = SecurityCard.objects.filter(status=SecurityCard.Status.AVAILABLE)
                 return Response(
                     {
@@ -96,19 +98,20 @@ class ScanView(APIView):
                     status=status.HTTP_200_OK,
                 )
 
-            security_card = SecurityCard.objects.filter(
-                card_number=security_card_number, status=SecurityCard.Status.AVAILABLE,
-            ).first()
-            if security_card is None:
-                return Response(
-                    {
-                        'success': False,
-                        'reason': 'security_card_unavailable',
-                        'member': member_brief,
-                        'log': None,
-                    },
-                    status=status.HTTP_200_OK,
-                )
+            if not skip_security_card:
+                security_card = SecurityCard.objects.filter(
+                    card_number=security_card_number, status=SecurityCard.Status.AVAILABLE,
+                ).first()
+                if security_card is None:
+                    return Response(
+                        {
+                            'success': False,
+                            'reason': 'security_card_unavailable',
+                            'member': member_brief,
+                            'log': None,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
         else:
             # 退室時：会員は一度に1枚しか借りられない前提のため、貸出中のカードがあれば
             # 返却対象は一意に決まる。追加のスキャン・入力を求めず自動的に返却扱いにする。
@@ -121,7 +124,7 @@ class ScanView(APIView):
                 member=member, type=next_type, method=method, scanned_by=request.user
             )
 
-            if next_type == AccessLog.LogType.CHECK_IN:
+            if next_type == AccessLog.LogType.CHECK_IN and security_card is not None:
                 CardLoan.objects.create(
                     member=member, security_card=security_card,
                     issued_by=request.user, access_log_in=log,

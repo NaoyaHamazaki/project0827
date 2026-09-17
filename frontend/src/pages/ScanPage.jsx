@@ -27,6 +27,7 @@ const RECENT_POLL_MS = 15000
 const QR_SCAN_INTERVAL_MS = 200
 const RESULT_AUTO_CLOSE_MS = 4000
 const MY_STATUS_POLL_MS = 5000
+const SKIP_SECURITY_CARD = '__skip__'
 
 const METHOD_TILES = [
   { key: 'card', label: 'バーコード / ICカード', icon: ScanLine },
@@ -210,55 +211,46 @@ function UsagePanel({ usage }) {
 
 function SecurityCardStep({ step, onConfirm, onCancel, isSubmitting }) {
   const { t } = useLanguage()
-  const [value, setValue] = useState('')
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [step])
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    const trimmed = value.trim()
-    if (!trimmed || isSubmitting) return
-    onConfirm(trimmed)
-    setValue('')
-  }
+  const [selected, setSelected] = useState(null)
 
   return (
     <div className="scan-panel scan-card-step">
       <p className="scan-panel__name">{step.memberBrief?.name}</p>
-      <p className="scan-panel__sub">{t('貸し出すセキュリティカードを選択、またはスキャンしてください')}</p>
-      {step.availableCards?.length > 0 ? (
+      <p className="scan-panel__sub">{t('貸し出すセキュリティカードを選択してください')}</p>
+      {step.availableCards?.length > 0 && (
         <div className="scan-card-step__list">
           {step.availableCards.map((card) => (
             <button
               key={card.id}
               type="button"
-              className="btn btn-secondary"
-              onClick={() => onConfirm(card.card_number)}
+              className={`btn btn-secondary scan-card-step__option ${selected === card.card_number ? 'is-selected' : ''}`}
+              onClick={() => setSelected(card.card_number)}
               disabled={isSubmitting}
             >
               {card.card_number}
             </button>
           ))}
         </div>
-      ) : (
+      )}
+      {!step.availableCards?.length && (
         <p className="scan-card-step__error">{t('貸出可能なセキュリティカードがありません')}</p>
       )}
-      <form className="scan-input scan-card-step__form" onSubmit={handleSubmit}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          placeholder={t('カード番号を入力/スキャン')}
-          autoComplete="off"
-        />
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {t('確定')}
-        </button>
-      </form>
+      <button
+        type="button"
+        className={`btn btn-secondary scan-card-step__option ${selected === SKIP_SECURITY_CARD ? 'is-selected' : ''}`}
+        onClick={() => setSelected(SKIP_SECURITY_CARD)}
+        disabled={isSubmitting}
+      >
+        {t('スキップ')}
+      </button>
+      <button
+        type="button"
+        className="btn btn-primary scan-card-step__submit"
+        onClick={() => onConfirm(selected)}
+        disabled={isSubmitting || selected === null}
+      >
+        {t('貸出')}
+      </button>
       <button type="button" className="btn btn-secondary scan-card-step__cancel" onClick={onCancel}>
         {t('キャンセル')}
       </button>
@@ -359,13 +351,13 @@ function AdminScanView() {
   }
 
   const submitScan = useCallback(
-    async (rawValue, method, securityCardNumber = '') => {
+    async (rawValue, method, securityCardNumber = '', skipSecurityCard = false) => {
       const trimmed = rawValue.trim()
       if (!trimmed || isSubmitting) return
 
       setIsSubmitting(true)
       try {
-        const response = await scanCard(trimmed, method, securityCardNumber)
+        const response = await scanCard(trimmed, method, securityCardNumber, skipSecurityCard)
 
         if (!response.success && response.reason === 'security_card_required') {
           setPendingCardStep({
@@ -401,9 +393,13 @@ function AdminScanView() {
     setCardInput('')
   }
 
-  const handleSecurityCardConfirm = (securityCardNumber) => {
+  const handleSecurityCardConfirm = (selection) => {
     if (!pendingCardStep) return
-    submitScan(pendingCardStep.cardIdentifier, pendingCardStep.method, securityCardNumber)
+    if (selection === SKIP_SECURITY_CARD) {
+      submitScan(pendingCardStep.cardIdentifier, pendingCardStep.method, '', true)
+    } else {
+      submitScan(pendingCardStep.cardIdentifier, pendingCardStep.method, selection)
+    }
   }
 
   const handleSecurityCardCancel = () => {

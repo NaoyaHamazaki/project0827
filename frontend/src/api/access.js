@@ -1,8 +1,9 @@
 import client from './client'
 
-export async function scanCard(cardIdentifier, method = 'card', securityCardNumber = '') {
+export async function scanCard(cardIdentifier, method = 'card', securityCardNumber = '', skipSecurityCard = false) {
   const payload = { card_identifier: cardIdentifier, method }
   if (securityCardNumber) payload.security_card_number = securityCardNumber
+  if (skipSecurityCard) payload.skip_security_card = true
   const { data } = await client.post('/scan/', payload)
   return data
 }

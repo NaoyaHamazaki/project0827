@@ -45,6 +45,7 @@ class ScanRequestSerializer(serializers.Serializer):
     security_card_number = serializers.CharField(
         max_length=50, required=False, allow_blank=True, trim_whitespace=True,
     )
+    skip_security_card = serializers.BooleanField(required=False, default=False)
 
 
 class CurrentOccupantSerializer(serializers.ModelSerializer):
