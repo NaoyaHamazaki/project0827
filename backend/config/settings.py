@@ -170,3 +170,7 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
     'http://localhost:5827,http://127.0.0.1:5827',
 ).split(',')
+
+# デモ公開時、パスワードを知っている人だけがログイン画面にたどり着けるようにする
+# 一時的な簡易ゲート。未設定（空文字）ならゲート自体が無効になる。
+DEMO_GATE_PASSWORD = os.environ.get('DEMO_GATE_PASSWORD', '')

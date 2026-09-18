@@ -14,3 +14,13 @@ export async function updateLanguage(language) {
   const { data } = await client.patch('/auth/me/', { language })
   return data
 }
+
+export async function fetchGateStatus() {
+  const { data } = await client.get('/auth/gate/status/')
+  return data
+}
+
+export async function verifyGatePassword(password) {
+  const { data } = await client.post('/auth/gate/verify/', { password })
+  return data
+}
