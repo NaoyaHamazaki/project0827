@@ -6,9 +6,8 @@ project0827（受付・入退室管理システム）を ngrok でスマホ公�
 - ngrok がフロントエンド（Vite, 5827番）のみをトンネルしていること
   （バックエンドAPIへのアクセスは frontend/vite.config.js の server.proxy 経由で中継される）
 - ngrok のローカル管理API（http://127.0.0.1:4040）が有効であること
-
-元になった外部接続用スクリプト（送信先LINEアカウント・トークンは同一のものを流用）:
-C:\\Users\\right\\OneDrive\\Desktop\\外部接続用\\03_QRも送信できるよう調整した版\\send_ngrok_to_line_bot.py
+- このフォルダに .env ファイルを作成し、LINE_CHANNEL_ACCESS_TOKEN / LINE_USER_ID を
+  設定しておくこと（.env.example を参照。.env はGit管理外）
 """
 
 import os
@@ -16,19 +15,16 @@ import time
 
 import qrcode
 import requests
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 NGROK_API = "http://127.0.0.1:4040/api/tunnels"
 
-# LINE Messaging API のチャネルアクセストークン・送信先ユーザーID
-# （外部接続用フォルダの既存スクリプトと同一のものを流用）
-LINE_TOKEN = (
-    "o8NK5/tVJvqpbjqnwq5l9qLGAWsinfqkdOG24HM+Dow/VLwWMQCYmj120f7HzVc9Kgb4om0gy9Jg1"
-    "mW4ycazncfSIEvbYGaib6bI/7lly0J7cBO6vGLG/chGFXf0j0me5HaCZgrklWpNM6MYLw2e2AdB04t"
-    "89/1O/w1cDnyilFU="
-)
-LINE_USER_ID = "U717b1195651529376fbdcf487205fe82"
+LINE_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
+LINE_USER_ID = os.environ.get("LINE_USER_ID", "")
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 QR_OUTPUT_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "..", "frontend", "public", "qr.png"))
 
 
@@ -81,6 +77,12 @@ def notify_line(url, qr_url):
 
 
 def main():
+    if not LINE_TOKEN or not LINE_USER_ID:
+        raise RuntimeError(
+            "LINE_CHANNEL_ACCESS_TOKEN / LINE_USER_ID が設定されていません。"
+            "tools/ngrok_tunnel/.env.example を参考に .env を作成してください。"
+        )
+
     url = get_ngrok_https_url()
     print("ngrok URL:", url)
 
