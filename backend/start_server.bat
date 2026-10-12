@@ -7,8 +7,8 @@ set PORT=8827
 netstat -ano | findstr ":%PORT% " | findstr "LISTENING" >nul
 if not errorlevel 1 (
     echo [start_server] ERROR: Port %PORT% is already in use.
-    echo [start_server] Another project's server (or a leftover process from a
-    echo [start_server] previous run) may already be using this port. Check with:
+    echo [start_server] Another project's server, or a leftover process from a
+    echo [start_server] previous run, may already be using this port. Check with:
     echo [start_server]     netstat -ano ^| findstr :%PORT%
     echo [start_server] and stop that process, then try again.
     pause

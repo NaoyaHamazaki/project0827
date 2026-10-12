@@ -6,8 +6,8 @@ set PORT=5827
 netstat -ano | findstr ":%PORT% " | findstr "LISTENING" >nul
 if not errorlevel 1 (
     echo [start_dev] ERROR: Port %PORT% is already in use.
-    echo [start_dev] Another project's dev server (or a leftover process from a
-    echo [start_dev] previous run) may already be using this port. Check with:
+    echo [start_dev] Another project's dev server, or a leftover process from a
+    echo [start_dev] previous run, may already be using this port. Check with:
     echo [start_dev]     netstat -ano ^| findstr :%PORT%
     echo [start_dev] and stop that process, then try again.
     pause
