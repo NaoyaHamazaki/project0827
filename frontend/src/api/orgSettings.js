@@ -33,3 +33,13 @@ export async function testWebhook(id) {
   const { data } = await client.post(`/orgsettings/webhooks/${id}/test/`)
   return data
 }
+
+export async function fetchDebugTables() {
+  const { data } = await client.get('/orgsettings/debug-tables/')
+  return data
+}
+
+export async function fetchDebugTableRows(table) {
+  const { data } = await client.get('/orgsettings/debug-tables/rows/', { params: { table } })
+  return data
+}

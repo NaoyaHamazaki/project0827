@@ -108,3 +108,59 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+
+.settings-page__debug-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.settings-page__debug-controls select {
+  flex: 1;
+  max-width: 420px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.settings-page__debug-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.settings-page__debug-count {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.settings-page__debug-table-wrap {
+  max-width: 100%;
+  max-height: 420px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.settings-page__debug-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.settings-page__debug-table th,
+.settings-page__debug-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.settings-page__debug-table th {
+  position: sticky;
+  top: 0;
+  background-color: var(--color-surface-muted);
+  font-weight: 700;
+}
