@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ScanLine, Users, ClipboardList, LogOut, Settings, Menu, X, History, CreditCard } from 'lucide-react'
+import { ScanLine, Users, ClipboardList, LogOut, Settings, Menu, X, History, CreditCard, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext'
 import './Layout.css'
@@ -85,6 +85,12 @@ export default function Layout() {
             <NavLink to="/settings" className="layout__link">
               <Settings size={18} />
               {t('設定')}
+            </NavLink>
+          )}
+          {isAdmin && (
+            <NavLink to="/security-info" className="layout__link">
+              <ShieldCheck size={18} />
+              {t('セキュリティについて')}
             </NavLink>
           )}
         </nav>

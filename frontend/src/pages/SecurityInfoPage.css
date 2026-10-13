@@ -1,0 +1,126 @@
+.security-info-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 960px;
+}
+
+.security-info-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.security-info-page__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.security-info-page__diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.security-info-page__diagram-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 96px;
+  color: var(--color-text);
+}
+
+.security-info-page__diagram-node span {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.security-info-page__diagram-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-text-muted);
+}
+
+.security-info-page__diagram-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .security-info-page__diagram {
+    flex-direction: column;
+  }
+
+  .security-info-page__diagram-arrow {
+    flex-direction: row;
+  }
+}
+
+.security-info-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.security-info-page__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.security-info-page__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft, var(--color-surface-muted));
+  color: var(--color-primary);
+}
+
+.security-info-page__card h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.security-info-page__card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+.security-info-page__footer {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .security-info-page__grid {
+    grid-template-columns: 1fr;
+  }
+}

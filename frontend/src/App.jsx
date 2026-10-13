@@ -9,6 +9,7 @@ import MembersPage from './pages/MembersPage'
 import LogsPage from './pages/LogsPage'
 import SecurityCardsPage from './pages/SecurityCardsPage'
 import SettingsPage from './pages/SettingsPage'
+import SecurityInfoPage from './pages/SecurityInfoPage'
 import MyHistoryPage from './pages/MyHistoryPage'
 import { fetchGateStatus } from './api/auth'
 
@@ -68,6 +69,14 @@ export default function App() {
           element={
             <ProtectedRoute adminOnly>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security-info"
+          element={
+            <ProtectedRoute adminOnly>
+              <SecurityInfoPage />
             </ProtectedRoute>
           }
         />
