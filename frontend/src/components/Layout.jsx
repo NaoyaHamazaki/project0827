@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { ScanLine, Users, ClipboardList, LogOut, Settings, Menu, X, History, CreditCard, ShieldCheck } from 'lucide-react'
+import { ScanLine, Users, ClipboardList, LogOut, Settings, Menu, X, History, CreditCard, MessageCircle, ShieldCheck } from 'lucide-react'
+import { fetchChatUnread } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext'
 import './Layout.css'
@@ -32,6 +33,17 @@ export default function Layout() {
   const { t } = useLanguage()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
+  const [chatUnread, setChatUnread] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    const load = () => fetchChatUnread()
+      .then((count) => { if (!cancelled) setChatUnread(count) })
+      .catch(() => {})
+    load()
+    const timer = setInterval(load, 8000)
+    return () => { cancelled = true; clearInterval(timer) }
+  }, [location.pathname])
 
   useEffect(() => {
     setIsMenuOpen(false)
@@ -56,6 +68,11 @@ export default function Layout() {
           <NavLink to="/" end className="layout__link">
             <ScanLine size={18} />
             {t('スキャン受付')}
+          </NavLink>
+          <NavLink to="/chat" className="layout__link">
+            <MessageCircle size={18} />
+            {t('チャット')}
+            {chatUnread > 0 && <span className="layout__badge">{chatUnread}</span>}
           </NavLink>
           {!isAdmin && (
             <NavLink to="/my-history" className="layout__link">

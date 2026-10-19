@@ -11,6 +11,7 @@ import SecurityCardsPage from './pages/SecurityCardsPage'
 import SettingsPage from './pages/SettingsPage'
 import SecurityInfoPage from './pages/SecurityInfoPage'
 import MyHistoryPage from './pages/MyHistoryPage'
+import ChatPage from './pages/ChatPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
       >
         <Route path="/" element={<ScanPage />} />
         <Route path="/my-history" element={<MyHistoryPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route
           path="/members"
           element={

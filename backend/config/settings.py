@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'access',
     'cards',
     'orgsettings',
+    'chat',
 ]
 
 MIDDLEWARE = [

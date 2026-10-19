@@ -15,6 +15,23 @@ export const en = {
   '読み込み中…': 'Loading…',
   '選択してください': 'Please select',
 
+  // チャット
+  'チャット': 'Chat',
+  'ユーザーを検索してチャットを開始': 'Search users to start a chat',
+  'ユーザー検索': 'Search users',
+  '該当するユーザーがいません': 'No users found',
+  'メッセージはまだありません': 'No messages yet',
+  '上の検索バーから相手を探してチャットを始めましょう': 'Use the search bar above to find someone and start chatting',
+  '最初のメッセージを送ってみましょう': 'Send the first message',
+  'チャットを選択してください': 'Select a chat',
+  '送信に失敗しました': 'Failed to send',
+  '戻る': 'Back',
+  'いいね': 'Like',
+  '太字': 'Bold',
+  'Enterで送信 / Shift+Enterで改行': 'Enter to send / Shift+Enter for newline',
+  'メッセージを入力': 'Type a message',
+  '送信': 'Send',
+
   // Layout
   '受付システム': 'Reception System',
   'スキャン受付': 'Scan Check-in',
