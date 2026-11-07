@@ -5,18 +5,45 @@ export const CANVAS_COLS = 40
 export const CANVAS_ROWS = 28
 export const CELL_PX = 20
 
+const EDGE_LABEL_OFFSET_PX = 14
+
 const toPx = (points) => points.map(([x, y]) => `${x * CELL_PX},${y * CELL_PX}`).join(' ')
 const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
+
+const formatLength = (value) => (Number.isInteger(value) ? String(value) : value.toFixed(1))
+
+// 図形の各辺の中点から外向きにオフセットした位置へ、辺の長さ（マス数）ラベルを置く
+function edgeLengthLabels(points) {
+  const n = points.length
+  const centroid = points.reduce((acc, [x, y]) => [acc[0] + x / n, acc[1] + y / n], [0, 0])
+  return points.map(([x1, y1], i) => {
+    const [x2, y2] = points[(i + 1) % n]
+    const length = Math.hypot(x2 - x1, y2 - y1)
+    const midX = ((x1 + x2) / 2) * CELL_PX
+    const midY = ((y1 + y2) / 2) * CELL_PX
+    const dirX = midX - centroid[0] * CELL_PX
+    const dirY = midY - centroid[1] * CELL_PX
+    const dirLen = Math.hypot(dirX, dirY) || 1
+    return {
+      key: i,
+      x: midX + (dirX / dirLen) * EDGE_LABEL_OFFSET_PX,
+      y: midY + (dirY / dirLen) * EDGE_LABEL_OFFSET_PX,
+      text: formatLength(length),
+    }
+  })
+}
 
 /**
  * 右側の配置エリア。
  * - edit: 図形をドラッグして配置（1マス単位でスナップ）。クリックで選択
  * - view: 移動不可。ホバーで少し拡大、クリックで onShapeClick
+ * どちらのモードでもホバー中の図形には、辺ごとの長さ（マス数）を表示する
  */
 export default function FloorPlanCanvas({ shapes, mode, selectedId, onSelect, onMove, onShapeClick }) {
   const svgRef = useRef(null)
   const dragRef = useRef(null)
   const [draggingId, setDraggingId] = useState(null)
+  const [hoveredId, setHoveredId] = useState(null)
   const width = CANVAS_COLS * CELL_PX
   const height = CANVAS_ROWS * CELL_PX
 
@@ -78,6 +105,8 @@ export default function FloorPlanCanvas({ shapes, mode, selectedId, onSelect, on
               ].join(' ')}
               onPointerDown={(event) => handleShapePointerDown(event, shape)}
               onClick={() => mode === 'view' && onShapeClick(shape)}
+              onMouseEnter={() => setHoveredId(shape.id)}
+              onMouseLeave={() => setHoveredId((current) => (current === shape.id ? null : current))}
             >
               {shape.name && <title>{shape.name}</title>}
               <polygon points={toPx(shape.points)} className="floor-plan-shape" />
@@ -87,6 +116,20 @@ export default function FloorPlanCanvas({ shapes, mode, selectedId, onSelect, on
                 </foreignObject>
               )}
             </g>
+            {hoveredId === shape.id && (
+              <g className="floor-plan-canvas__edge-labels">
+                {edgeLengthLabels(shape.points).map((label) => (
+                  <g key={label.key} transform={`translate(${label.x} ${label.y})`}>
+                    <rect
+                      x={-10 - label.text.length * 2.5} y={-8}
+                      width={20 + label.text.length * 5} height={16}
+                      rx={4}
+                    />
+                    <text textAnchor="middle" dominantBaseline="middle">{label.text}</text>
+                  </g>
+                ))}
+              </g>
+            )}
           </g>
         ))}
       </svg>

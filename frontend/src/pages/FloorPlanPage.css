@@ -254,6 +254,22 @@
   stroke-width: 1;
 }
 
+.floor-plan-canvas__edge-labels {
+  pointer-events: none;
+}
+
+.floor-plan-canvas__edge-labels rect {
+  fill: #fff7e0;
+  stroke: #d9a916;
+  stroke-width: 1;
+}
+
+.floor-plan-canvas__edge-labels text {
+  font-size: 10px;
+  font-weight: 700;
+  fill: #7a5a00;
+}
+
 .floor-plan-canvas__label-wrap {
   display: flex;
   align-items: center;
