@@ -18,6 +18,9 @@ import ChatSettingsPage from './pages/ChatSettingsPage'
 import MeetingRoomBookingPage from './pages/MeetingRoomBookingPage'
 import MeetingRoomStatusPage from './pages/MeetingRoomStatusPage'
 import MeetingRoomSettingsPage from './pages/MeetingRoomSettingsPage'
+import OrderPage from './pages/OrderPage'
+import OrderListPage from './pages/OrderListPage'
+import OrderMenuSettingsPage from './pages/OrderMenuSettingsPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -125,7 +128,7 @@ export default function App() {
           path="/orders"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="注文一覧" />
+              <OrderListPage />
             </ProtectedRoute>
           }
         />
@@ -133,11 +136,11 @@ export default function App() {
           path="/orders/menu-settings"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="メニュー設定" />
+              <OrderMenuSettingsPage />
             </ProtectedRoute>
           }
         />
-        <Route path="/orders/new" element={<PlaceholderPage title="注文" />} />
+        <Route path="/orders/new" element={<OrderPage />} />
         <Route path="/account-settings" element={<PlaceholderPage title="設定" />} />
       </Route>
     </Routes>

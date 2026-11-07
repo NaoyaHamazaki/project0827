@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'orgsettings',
     'chat',
     'meetingrooms',
+    'orders',
 ]
 
 MIDDLEWARE = [

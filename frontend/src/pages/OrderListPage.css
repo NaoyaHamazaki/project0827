@@ -1,0 +1,79 @@
+.order-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.order-list-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.order-list-page__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.order-list__company {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.order-list__status-cell {
+  position: relative;
+}
+
+.order-list__status-badge {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.order-list__status-badge--received {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.order-list__status-badge--done {
+  background-color: var(--color-success-bg, #e3f6ea);
+  color: var(--color-success, #1c7c40);
+}
+
+.order-list__status-badge--cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.order-list__status-menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.12));
+  overflow: hidden;
+}
+
+.order-list__status-menu button {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--color-text);
+}
+
+.order-list__status-menu button:hover {
+  background-color: var(--color-surface-muted);
+}

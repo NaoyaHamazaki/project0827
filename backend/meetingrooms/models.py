@@ -8,6 +8,10 @@ class MeetingRoom(models.Model):
     name = models.CharField('会議室名', max_length=100)
     is_bookable = models.BooleanField('予約可能', default=True)
     order = models.PositiveIntegerField('表示順', default=0)
+    site_id = models.CharField(
+        '拠点ID', max_length=50, blank=True,
+        help_text='複数拠点運用を見据えた項目。現状は未使用（空欄のままでよい）',
+    )
     created_at = models.DateTimeField('登録日時', auto_now_add=True)
 
     class Meta:
