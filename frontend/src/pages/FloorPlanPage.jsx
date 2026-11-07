@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Eraser, Trash2 } from 'lucide-react'
 import { fetchAllRooms } from '../api/meetingRooms'
@@ -10,12 +10,15 @@ import { useToast } from '../context/ToastContext'
 import { createEmptyGrid, detectPolygon } from '../utils/floorPlanGeometry'
 import './FloorPlanPage.css'
 
+// three.js は大きいので、3D表示タブを開いたときだけ読み込む
+const FloorPlan3D = lazy(() => import('../components/floorplan/FloorPlan3D'))
+
 const GRID_SIZE = 12
 const DEFAULT_HEIGHT = 250
 const MODES = [
   { key: 'edit', label: '編集', ready: true },
   { key: 'view', label: '表示', ready: true },
-  { key: '3d', label: '3D表示（試用）', ready: false },
+  { key: '3d', label: '3D表示（試用）', ready: true },
 ]
 
 // 既存の図形と1マス以上離れる最初の位置（左上から順に探す）。空きがなければ左上に置く
@@ -187,7 +190,9 @@ export default function FloorPlanPage() {
               </button>
             ))}
             <span className="floor-plan-main__hint">
-              {mode === 'edit' ? 'ドラッグで移動（1マス単位）' : 'クリックで詳細を表示'}
+              {mode === 'edit' && 'ドラッグで移動（1マス単位）'}
+              {mode === 'view' && 'クリックで詳細を表示'}
+              {mode === '3d' && 'ベータ版：高さを反映した立体表示です'}
             </span>
             {mode === 'edit' && selectedId && (
               <button type="button" className="floor-plan-main__delete" onClick={deleteSelected}>
@@ -196,14 +201,20 @@ export default function FloorPlanPage() {
               </button>
             )}
           </div>
-          <FloorPlanCanvas
-            shapes={shapes}
-            mode={mode}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onMove={moveShape}
-            onShapeClick={setDetailShape}
-          />
+          {mode === '3d' ? (
+            <Suspense fallback={<div className="floor-plan-3d floor-plan-3d--loading">3D表示を読み込み中…</div>}>
+              <FloorPlan3D shapes={shapes} onShapeClick={setDetailShape} />
+            </Suspense>
+          ) : (
+            <FloorPlanCanvas
+              shapes={shapes}
+              mode={mode}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onMove={moveShape}
+              onShapeClick={setDetailShape}
+            />
+          )}
         </section>
         {detailShape && (
           <ShapeDetailModal
