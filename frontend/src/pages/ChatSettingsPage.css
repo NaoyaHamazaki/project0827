@@ -1,0 +1,85 @@
+.chat-settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 720px;
+}
+
+.chat-settings-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.chat-settings-page__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.chat-settings-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chat-settings-page__card {
+  display: flex;
+  gap: var(--space-3);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.chat-settings-page__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.chat-settings-page__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-settings-page__card-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.chat-settings-page__card-title-row h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.chat-settings-page__badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chat-settings-page__card-body p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.chat-settings-page__footer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-faint, var(--color-text-muted));
+}

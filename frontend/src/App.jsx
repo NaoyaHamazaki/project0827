@@ -13,6 +13,8 @@ import SecurityInfoPage from './pages/SecurityInfoPage'
 import MyHistoryPage from './pages/MyHistoryPage'
 import ChatPage from './pages/ChatPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import ReceptionSettingsPage from './pages/ReceptionSettingsPage'
+import ChatSettingsPage from './pages/ChatSettingsPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -87,7 +89,7 @@ export default function App() {
           path="/reception-settings"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="受付設定" />
+              <ReceptionSettingsPage />
             </ProtectedRoute>
           }
         />
@@ -95,7 +97,7 @@ export default function App() {
           path="/chat-settings"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="チャット設定" />
+              <ChatSettingsPage />
             </ProtectedRoute>
           }
         />
