@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import {
-  ScanLine, LogOut, Menu, X, MessageCircle, ChevronDown, Armchair, ClipboardCheck, Home,
-} from 'lucide-react'
-import { fetchAdminChatTargets, fetchChatUnread } from '../api/chat'
+import { LogOut, Menu, X, ChevronDown, Home } from 'lucide-react'
+import { fetchChatUnread } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext'
-import { ADMIN_NAV_GROUPS, findActiveGroup } from '../navConfig'
+import { ADMIN_NAV_GROUPS, USER_NAV_ITEMS, findActiveGroup } from '../navConfig'
 import MiniNav from './MiniNav'
 import './Layout.css'
 
@@ -78,70 +76,6 @@ function NavGroup({ icon: Icon, label, items, badge, isActiveGroup }) {
   )
 }
 
-// チャットの子メニューは「同一事業者の管理者一覧」を動的に取得して表示する（ユーザー側のみ）
-function UserChatNavGroup({ unread }) {
-  const { t } = useLanguage()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [admins, setAdmins] = useState([])
-  const isActiveGroup = location.pathname.startsWith('/chat')
-  const [isOpen, setIsOpen] = useState(isActiveGroup)
-
-  useEffect(() => {
-    fetchAdminChatTargets().then(setAdmins).catch(() => setAdmins([]))
-  }, [])
-
-  useEffect(() => {
-    if (isActiveGroup) setIsOpen(true)
-  }, [isActiveGroup])
-
-  const handleToggle = () => {
-    if (!isOpen) {
-      setIsOpen(true)
-      if (admins.length > 0) navigate(`/chat?with=${admins[0].id}`)
-      else navigate('/chat')
-    } else {
-      setIsOpen(false)
-    }
-  }
-
-  return (
-    <div className="layout__group">
-      <button
-        type="button"
-        className={`layout__link layout__group-toggle ${isActiveGroup ? 'active' : ''}`}
-        onClick={handleToggle}
-        aria-expanded={isOpen}
-      >
-        <MessageCircle size={18} />
-        <span className="layout__group-label">{t('チャット')}</span>
-        {unread > 0 && <span className="layout__badge">{unread}</span>}
-        <ChevronDown size={14} className={`layout__group-chevron ${isOpen ? 'is-open' : ''}`} />
-      </button>
-      {isOpen && (
-        <div className="layout__group-children">
-          {admins.map((admin) => (
-            <NavLink
-              key={admin.id}
-              to={`/chat?with=${admin.id}`}
-              className={() => `layout__link layout__link--child ${
-                location.pathname.startsWith('/chat') && location.search === `?with=${admin.id}` ? 'active' : ''
-              }`}
-            >
-              {admin.display_name}
-            </NavLink>
-          ))}
-          {admins.length === 0 && (
-            <span className="layout__link layout__link--child layout__link--empty">
-              {t('管理者アカウントがありません')}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function Layout() {
   const { staff, isAdmin, logout } = useAuth()
   const { t } = useLanguage()
@@ -182,43 +116,33 @@ export default function Layout() {
           </button>
         </div>
         <nav className={`layout__nav ${isMenuOpen ? 'is-open' : ''}`}>
+          <NavLink to="/top" className="layout__link">
+            <Home size={18} />
+            {t('トップ')}
+          </NavLink>
           {isAdmin ? (
-            <>
-              <NavLink to="/top" className="layout__link">
-                <Home size={18} />
-                {t('トップ')}
-              </NavLink>
-              {ADMIN_NAV_GROUPS.map((group) => (
+            ADMIN_NAV_GROUPS.map((group) => (
+              <Fragment key={group.key}>
                 <NavGroup
-                  key={group.key}
                   icon={group.icon}
                   label={t(group.label)}
                   items={group.items.map((item) => ({ ...item, label: t(item.label) }))}
                   badge={group.badgeKey ? badges[group.badgeKey] : undefined}
                   isActiveGroup={activeGroup?.key === group.key}
                 />
-              ))}
-            </>
+                {group.dividerAfter && <div className="layout__nav-divider" />}
+              </Fragment>
+            ))
           ) : (
-            <>
-              <NavLink to="/" end className="layout__link">
-                <ScanLine size={18} />
-                {t('スキャン受付')}
+            USER_NAV_ITEMS.map((item) => (
+              <NavLink key={item.key} to={item.to} end={item.end} className="layout__link">
+                <item.icon size={18} />
+                {t(item.label)}
+                {item.badgeKey && badges[item.badgeKey] > 0 && (
+                  <span className="layout__badge">{badges[item.badgeKey]}</span>
+                )}
               </NavLink>
-              <UserChatNavGroup unread={chatUnread} />
-              <NavLink to="/meeting-rooms/book" className="layout__link">
-                <Armchair size={18} />
-                {t('会議室予約')}
-              </NavLink>
-              <NavLink to="/orders/new" className="layout__link">
-                <ClipboardCheck size={18} />
-                {t('注文')}
-              </NavLink>
-              <NavLink to="/account-settings" className="layout__link">
-                <ClipboardCheck size={18} />
-                {t('設定')}
-              </NavLink>
-            </>
+            ))
           )}
         </nav>
         <div className={`layout__footer ${isMenuOpen ? 'is-open' : ''}`}>

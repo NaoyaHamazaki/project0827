@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Bold, Search, Send, ThumbsUp } from 'lucide-react'
 import {
-  fetchConversations, fetchMessages, openConversation, searchChatUsers,
+  fetchAdminChatTargets, fetchConversations, fetchMessages, openConversation, searchChatUsers,
   sendMessage, toggleThumbsUp,
 } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
@@ -100,7 +100,7 @@ function Sidebar({ conversations, activeId, onSelect, onOpenUser }) {
               <button
                 type="button"
                 className={`chat__item ${conv.id === activeId ? 'is-active' : ''}`}
-                onClick={() => onSelect(conv.id)}
+                onClick={() => (conv.isSynthetic ? onOpenUser(conv.partner.id) : onSelect(conv.id))}
               >
                 <span className="chat__avatar">{conv.partner?.display_name.slice(0, 1)}</span>
                 <span className="chat__item-main">
@@ -284,7 +284,9 @@ function Thread({ conversation, onBack, onSent }) {
 
 export default function ChatPage() {
   const { t } = useLanguage()
+  const { isAdmin } = useAuth()
   const [conversations, setConversations] = useState([])
+  const [admins, setAdmins] = useState([])
   const [activeId, setActiveId] = useState(null)
   const [extra, setExtra] = useState(null)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -299,6 +301,24 @@ export default function ChatPage() {
     const timer = setInterval(reload, POLL_MS * 2)
     return () => clearInterval(timer)
   }, [reload])
+
+  // ユーザー側は、同一事業者の管理者をチャット相手として一覧の先頭に固定表示する
+  // （まだ会話が無い場合は、押下するとその場で会話が開始される仮の項目として表示する）
+  useEffect(() => {
+    if (isAdmin) return
+    fetchAdminChatTargets().then(setAdmins).catch(() => setAdmins([]))
+  }, [isAdmin])
+
+  const displayConversations = useMemo(() => {
+    if (isAdmin || admins.length === 0) return conversations
+    const adminIds = new Set(admins.map((admin) => admin.id))
+    const pinned = admins.map((admin) => (
+      conversations.find((conv) => conv.partner?.id === admin.id)
+      || { id: `admin-${admin.id}`, partner: admin, last_message: null, unread_count: 0, isSynthetic: true }
+    ))
+    const rest = conversations.filter((conv) => !adminIds.has(conv.partner?.id))
+    return [...pinned, ...rest]
+  }, [conversations, admins, isAdmin])
 
   const openUser = useCallback(async (userId) => {
     try {
@@ -330,7 +350,7 @@ export default function ChatPage() {
       <h1 className="chat__title">{t('チャット')}</h1>
       <div className="chat__layout">
         <Sidebar
-          conversations={conversations}
+          conversations={displayConversations}
           activeId={activeId}
           onSelect={setActiveId}
           onOpenUser={openUser}

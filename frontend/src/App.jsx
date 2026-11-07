@@ -61,11 +61,7 @@ export default function App() {
         <Route path="/chat" element={<ChatPage />} />
         <Route
           path="/top"
-          element={
-            <ProtectedRoute adminOnly>
-              <TopPage />
-            </ProtectedRoute>
-          }
+          element={<TopPage />}
         />
         <Route
           path="/members"

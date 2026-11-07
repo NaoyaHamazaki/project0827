@@ -33,6 +33,13 @@
   transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+.top-page__divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-2) 0;
+}
+
 .top-page__card:hover {
   background-color: var(--color-primary-soft);
   color: var(--color-primary);

@@ -39,6 +39,7 @@ export const ADMIN_NAV_GROUPS = [
     key: 'orders',
     icon: ClipboardCheck,
     label: '注文',
+    dividerAfter: true,
     items: [
       { to: '/orders', end: true, label: '注文一覧' },
       { to: '/orders/menu-settings', label: 'メニュー設定' },
@@ -73,6 +74,15 @@ export const ADMIN_NAV_GROUPS = [
       { to: '/settings/debug-tables', label: '（テスト用）テーブル情報' },
     ],
   },
+]
+
+// ユーザー側メニュー（サブメニューを持たないフラットな項目のみ）
+export const USER_NAV_ITEMS = [
+  { key: 'scan', icon: ScanLine, to: '/', end: true, label: 'スキャン受付' },
+  { key: 'chat', icon: MessageCircle, to: '/chat', label: 'チャット', badgeKey: 'chat' },
+  { key: 'meeting-rooms', icon: Armchair, to: '/meeting-rooms/book', label: '会議室予約' },
+  { key: 'orders', icon: ClipboardCheck, to: '/orders/new', label: '注文' },
+  { key: 'settings', icon: Settings, to: '/account-settings', label: '設定' },
 ]
 
 export function pathMatchesItem(pathname, to) {
