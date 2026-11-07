@@ -1,0 +1,59 @@
+@import './SettingsPage.css';
+
+.meeting-room-settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.meeting-room-settings-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.meeting-room-settings-page__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.meeting-room-settings-page__section-icon {
+  vertical-align: -3px;
+  margin-right: 6px;
+}
+
+.meeting-room-settings-page__table {
+  display: flex;
+  flex-direction: column;
+}
+
+.meeting-room-settings-page__row {
+  display: grid;
+  grid-template-columns: 1fr 100px 40px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.meeting-room-settings-page__row--head {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.meeting-room-settings-page__row--add {
+  border-bottom: none;
+  padding-top: var(--space-3);
+}
+
+.meeting-room-settings-page__row--add input {
+  width: 100%;
+}
+
+.meeting-room-settings-page__empty {
+  padding: var(--space-3) 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}

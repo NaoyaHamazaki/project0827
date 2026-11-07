@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'cards',
     'orgsettings',
     'chat',
+    'meetingrooms',
 ]
 
 MIDDLEWARE = [

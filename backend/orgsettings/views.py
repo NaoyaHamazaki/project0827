@@ -15,7 +15,7 @@ from .serializers import OrgSettingsSerializer, WebhookSerializer
 
 # テーブル確認（開発用）で表示対象とする自アプリの一覧。
 # Django組み込みのauth/admin/sessions等は対象外にする。
-DEBUG_TABLE_APP_LABELS = ['accounts', 'members', 'access', 'cards', 'orgsettings', 'chat']
+DEBUG_TABLE_APP_LABELS = ['accounts', 'members', 'access', 'cards', 'orgsettings', 'chat', 'meetingrooms']
 # 画面にそのまま出すべきでない値を持つ列（パスワードハッシュ・Webhookシークレット等）
 DEBUG_TABLE_MASKED_FIELDS = {'password', 'secret'}
 DEBUG_TABLE_ROW_LIMIT = 200

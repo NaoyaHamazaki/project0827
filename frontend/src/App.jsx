@@ -15,6 +15,9 @@ import ChatPage from './pages/ChatPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import ReceptionSettingsPage from './pages/ReceptionSettingsPage'
 import ChatSettingsPage from './pages/ChatSettingsPage'
+import MeetingRoomBookingPage from './pages/MeetingRoomBookingPage'
+import MeetingRoomStatusPage from './pages/MeetingRoomStatusPage'
+import MeetingRoomSettingsPage from './pages/MeetingRoomSettingsPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -101,12 +104,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/meeting-rooms/book" element={<PlaceholderPage title="会議室予約" />} />
+        <Route path="/meeting-rooms/book" element={<MeetingRoomBookingPage />} />
         <Route
           path="/meeting-rooms/status"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="予約状況" />
+              <MeetingRoomStatusPage />
             </ProtectedRoute>
           }
         />
@@ -114,7 +117,7 @@ export default function App() {
           path="/meeting-rooms/settings"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="会議室設定" />
+              <MeetingRoomSettingsPage />
             </ProtectedRoute>
           }
         />

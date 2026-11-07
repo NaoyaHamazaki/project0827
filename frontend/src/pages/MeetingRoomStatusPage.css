@@ -1,0 +1,43 @@
+.meeting-room-status-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.meeting-room-status-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.meeting-room-status-page__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.meeting-room-status__company {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.meeting-room-status__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-muted);
+}
+
+.meeting-room-status__badge--confirmed {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.meeting-room-status__badge--cancelled {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}

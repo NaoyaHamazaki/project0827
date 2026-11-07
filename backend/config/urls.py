@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/orgsettings/', include('orgsettings.urls')),
     path('api/cards/', include('cards.urls')),
     path('api/chat/', include('chat.urls')),
+    path('api/meeting-rooms/', include('meetingrooms.urls')),
     path('api/', include('access.urls')),
     # 上記以外の全パスはビルド済みフロントエンド（frontend/dist/index.html）を返す。
     # React Router側のルート（/members, /logs など）を直接開いたときのため、
