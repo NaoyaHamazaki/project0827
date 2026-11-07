@@ -22,6 +22,30 @@ DEBUG_TABLE_APP_LABELS = [
 DEBUG_TABLE_MASKED_FIELDS = {'password', 'secret'}
 DEBUG_TABLE_ROW_LIMIT = 200
 
+# 各テーブルが何のためのものかを一覧画面に表示するための説明文
+DEBUG_TABLE_DESCRIPTIONS = {
+    'accounts.Staff': 'ログインアカウント（管理者／ユーザー）。会員との紐づけや権限を保持します',
+    'members.Member': '受付・入退室の対象となる会員の基本情報（氏名・所属企業・カードID等）',
+    'members.Plan': '会員に割り当てる月間利用時間の上限プラン',
+    'access.AccessLog': '入退室（チェックイン・チェックアウト）の打刻ログ',
+    'cards.SecurityCard': '貸出用セキュリティカードの台帳',
+    'cards.CardLoan': 'セキュリティカードの貸出〜返却の記録',
+    'orgsettings.OrgSettings': '入力方式・CSV出力列などの運用設定（1件のみ）',
+    'orgsettings.Webhook': '入退室イベントを外部URLへ通知するWebhookの登録情報',
+    'chat.Conversation': 'チャットの会話単位（1対1）',
+    'chat.Participant': 'チャット会話の参加者（既読状況を含む）',
+    'chat.Message': 'チャットの送信メッセージ本文',
+    'chat.Reaction': 'チャットメッセージへのリアクション（いいね等）',
+    'meetingrooms.MeetingRoom': '会議室マスタ（名称・予約可否）',
+    'meetingrooms.Reservation': '会議室の予約情報',
+    'meetingrooms.FloorShape': '間取り図作成画面で描画した図形の履歴',
+    'meetingrooms.FloorPlanItem': '間取り図に配置済みの図形一式',
+    'orders.MenuItem': '注文メニューのマスタ（お茶・コーヒー等）',
+    'orders.OrderSettings': '注文の受付可能時間などの設定（1件のみ）',
+    'orders.Order': '注文（どの会議室への注文か・ステータス）',
+    'orders.OrderLine': '注文の明細（メニュー×数量）',
+}
+
 
 def _debug_models():
     models = {}
@@ -40,7 +64,11 @@ class DebugTableListView(APIView):
 
     def get(self, request):
         tables = [
-            {'value': key, 'label': f'{model._meta.verbose_name} ({key})'}
+            {
+                'value': key,
+                'label': f'{model._meta.verbose_name} ({key})',
+                'description': DEBUG_TABLE_DESCRIPTIONS.get(key, ''),
+            }
             for key, model in sorted(_debug_models().items())
         ]
         return Response(tables)

@@ -32,6 +32,12 @@ export function AuthProvider({ children }) {
     setStaff(null)
   }
 
+  const refreshStaff = async () => {
+    const data = await fetchMe()
+    setStaff(data)
+    return data
+  }
+
   const value = useMemo(
     () => ({
       staff,
@@ -40,6 +46,7 @@ export function AuthProvider({ children }) {
       isAdmin: staff?.role === 'admin',
       login,
       logout,
+      refreshStaff,
     }),
     [staff, isLoading]
   )

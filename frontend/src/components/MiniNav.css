@@ -1,0 +1,32 @@
+.mini-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+
+.mini-nav__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mini-nav__item:hover {
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.mini-nav__item.active {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}

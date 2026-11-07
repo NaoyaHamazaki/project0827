@@ -39,6 +39,20 @@
   padding: var(--space-5);
 }
 
+.settings-page__section--empty {
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-6);
+}
+
+.settings-page__section--empty p {
+  margin: 0;
+  max-width: 480px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
 .settings-page__section h2 {
   margin: 0;
   font-size: 16px;
@@ -107,6 +121,15 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.settings-page__form-error {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
 }
 
 .settings-page__debug-controls {

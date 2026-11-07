@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ScanLine, Users, ClipboardList, LogOut, Settings, Menu, X, CreditCard, MessageCircle,
-  ShieldCheck, ChevronDown, Armchair, ClipboardCheck,
+  ScanLine, LogOut, Menu, X, MessageCircle, ChevronDown, Armchair, ClipboardCheck, Home,
 } from 'lucide-react'
 import { fetchAdminChatTargets, fetchChatUnread } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext'
+import { ADMIN_NAV_GROUPS, findActiveGroup } from '../navConfig'
+import MiniNav from './MiniNav'
 import './Layout.css'
 
 function LanguageToggle() {
@@ -32,11 +33,10 @@ function LanguageToggle() {
 }
 
 // 親メニュー押下で展開し、展開時に子メニューの1つ目へ遷移する。
-// 子メニューのいずれかが現在地に一致する場合は自動的に展開状態にする。
-function NavGroup({ icon: Icon, label, items, badge }) {
-  const location = useLocation()
+// どのグループが現在地にあたるかは navConfig.findActiveGroup で一括判定した結果を受け取る
+// （パスがグループをまたいで前方一致しうるため、グループ単体では判定できない）
+function NavGroup({ icon: Icon, label, items, badge, isActiveGroup }) {
   const navigate = useNavigate()
-  const isActiveGroup = items.some((item) => location.pathname.startsWith(item.to))
   const [isOpen, setIsOpen] = useState(isActiveGroup)
 
   useEffect(() => {
@@ -163,6 +163,9 @@ export default function Layout() {
     setIsMenuOpen(false)
   }, [location.pathname])
 
+  const badges = { chat: chatUnread }
+  const activeGroup = isAdmin ? findActiveGroup(ADMIN_NAV_GROUPS, location.pathname) : null
+
   return (
     <div className="layout">
       <aside className="layout__sidebar">
@@ -181,58 +184,20 @@ export default function Layout() {
         <nav className={`layout__nav ${isMenuOpen ? 'is-open' : ''}`}>
           {isAdmin ? (
             <>
-              <NavGroup
-                icon={ScanLine}
-                label={t('受付')}
-                items={[
-                  { to: '/', end: true, label: t('スキャン受付') },
-                  { to: '/logs', label: t('受付ログ') },
-                  { to: '/reception-settings', label: t('受付設定') },
-                ]}
-              />
-              <NavGroup
-                icon={MessageCircle}
-                label={t('チャット')}
-                badge={chatUnread}
-                items={[
-                  { to: '/chat', label: t('チャット連絡') },
-                  { to: '/chat-settings', label: t('チャット設定') },
-                ]}
-              />
-              <NavGroup
-                icon={Armchair}
-                label={t('会議室')}
-                items={[
-                  { to: '/meeting-rooms/book', label: t('会議室予約') },
-                  { to: '/meeting-rooms/status', label: t('予約状況') },
-                  { to: '/meeting-rooms/settings', label: t('会議室設定') },
-                ]}
-              />
-              <NavGroup
-                icon={ClipboardCheck}
-                label={t('注文')}
-                items={[
-                  { to: '/orders', end: true, label: t('注文一覧') },
-                  { to: '/orders/menu-settings', label: t('メニュー設定') },
-                ]}
-              />
-              <NavLink to="/settings" className="layout__link">
-                <Settings size={18} />
-                {t('設定')}
+              <NavLink to="/top" className="layout__link">
+                <Home size={18} />
+                {t('トップ')}
               </NavLink>
-              <div className="layout__nav-divider" />
-              <NavLink to="/members" className="layout__link">
-                <Users size={18} />
-                {t('会員管理')}
-              </NavLink>
-              <NavLink to="/security-cards" className="layout__link">
-                <CreditCard size={18} />
-                {t('セキュリティカード管理')}
-              </NavLink>
-              <NavLink to="/security-info" className="layout__link">
-                <ShieldCheck size={18} />
-                {t('セキュリティについて')}
-              </NavLink>
+              {ADMIN_NAV_GROUPS.map((group) => (
+                <NavGroup
+                  key={group.key}
+                  icon={group.icon}
+                  label={t(group.label)}
+                  items={group.items.map((item) => ({ ...item, label: t(item.label) }))}
+                  badge={group.badgeKey ? badges[group.badgeKey] : undefined}
+                  isActiveGroup={activeGroup?.key === group.key}
+                />
+              ))}
             </>
           ) : (
             <>
@@ -250,7 +215,7 @@ export default function Layout() {
                 {t('注文')}
               </NavLink>
               <NavLink to="/account-settings" className="layout__link">
-                <Settings size={18} />
+                <ClipboardCheck size={18} />
                 {t('設定')}
               </NavLink>
             </>
@@ -269,6 +234,7 @@ export default function Layout() {
         </div>
       </aside>
       <main className="layout__content">
+        {isAdmin && activeGroup && <MiniNav group={activeGroup} />}
         <Outlet />
       </main>
     </div>

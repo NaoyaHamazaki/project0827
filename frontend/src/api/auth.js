@@ -15,6 +15,11 @@ export async function updateLanguage(language) {
   return data
 }
 
+export async function updateSelfAccount(payload) {
+  const { data } = await client.patch('/auth/me/account/', payload)
+  return data
+}
+
 export async function fetchGateStatus() {
   const { data } = await client.get('/auth/gate/status/')
   return data

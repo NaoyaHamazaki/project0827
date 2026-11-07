@@ -5,7 +5,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import StaffSerializer, StaffTokenObtainPairSerializer, UpdateLanguageSerializer
+from .serializers import (
+    StaffSerializer, StaffTokenObtainPairSerializer, UpdateLanguageSerializer,
+    UpdateSelfAccountSerializer,
+)
 
 
 class StaffTokenObtainPairView(TokenObtainPairView):
@@ -23,6 +26,18 @@ class MeView(APIView):
         serializer.is_valid(raise_exception=True)
         request.user.language = serializer.validated_data['language']
         request.user.save(update_fields=['language'])
+        return Response(StaffSerializer(request.user).data)
+
+
+class UpdateSelfAccountView(APIView):
+    """設定＞ユーザー画面から、ログイン中の本人が氏名・メールアドレス・パスワードを編集する"""
+
+    permission_classes = (IsAuthenticated,)
+
+    def patch(self, request):
+        serializer = UpdateSelfAccountSerializer(instance=request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(StaffSerializer(request.user).data)
 
 

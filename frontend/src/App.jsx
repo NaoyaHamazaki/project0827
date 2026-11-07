@@ -22,6 +22,9 @@ import FloorPlanPage from './pages/FloorPlanPage'
 import OrderPage from './pages/OrderPage'
 import OrderListPage from './pages/OrderListPage'
 import OrderMenuSettingsPage from './pages/OrderMenuSettingsPage'
+import TopPage from './pages/TopPage'
+import SettingsAccountPage from './pages/SettingsAccountPage'
+import TableInfoPage from './pages/TableInfoPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -53,10 +56,26 @@ export default function App() {
         <Route path="/my-history" element={<MyHistoryPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route
+          path="/top"
+          element={
+            <ProtectedRoute adminOnly>
+              <TopPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/members"
           element={
             <ProtectedRoute adminOnly>
               <MembersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members/new"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="新規会員作成" />
             </ProtectedRoute>
           }
         />
@@ -81,6 +100,30 @@ export default function App() {
           element={
             <ProtectedRoute adminOnly>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/account"
+          element={
+            <ProtectedRoute adminOnly>
+              <SettingsAccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/debug-tables"
+          element={
+            <ProtectedRoute adminOnly>
+              <TableInfoPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/announcements"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="アップデート情報" />
             </ProtectedRoute>
           }
         />
