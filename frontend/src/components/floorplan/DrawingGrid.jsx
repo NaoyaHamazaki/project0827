@@ -15,12 +15,20 @@ export default function DrawingGrid({ grid, vertexCells, onChange }) {
     return [r, c]
   }
 
-  const paint = (cell, value) => {
-    const [r, c] = cell
-    if (grid[r][c] === value) return
-    onChange((current) => current.map((row, ri) => (
-      ri === r ? row.map((v, ci) => (ci === c ? value : v)) : row
-    )))
+  const lastCellRef = useRef(null)
+
+  const paint = (cells, value) => {
+    const keys = new Set(cells.map(([r, c]) => `${r},${c}`))
+    onChange((current) => current.map((row, r) => row.map((v, c) => (keys.has(`${r},${c}`) ? value : v))))
+  }
+
+  // ポインタ移動イベントの間隔が空いても途中のマスを飛ばさないよう、前回位置から直線補間する
+  const cellsBetween = ([r0, c0], [r1, c1]) => {
+    const steps = Math.max(Math.abs(r1 - r0), Math.abs(c1 - c0))
+    return Array.from({ length: steps + 1 }, (_, i) => {
+      const t = steps === 0 ? 0 : i / steps
+      return [Math.round(r0 + (r1 - r0) * t), Math.round(c0 + (c1 - c0) * t)]
+    })
   }
 
   const handlePointerDown = (event) => {
@@ -28,16 +36,24 @@ export default function DrawingGrid({ grid, vertexCells, onChange }) {
     if (!cell) return
     event.currentTarget.setPointerCapture(event.pointerId)
     paintRef.current = !grid[cell[0]][cell[1]]
-    paint(cell, paintRef.current)
+    lastCellRef.current = cell
+    paint([cell], paintRef.current)
   }
 
   const handlePointerMove = (event) => {
     if (paintRef.current === null) return
     const cell = cellFromEvent(event)
-    if (cell) paint(cell, paintRef.current)
+    if (!cell) return
+    const last = lastCellRef.current
+    if (last && last[0] === cell[0] && last[1] === cell[1]) return
+    paint(cellsBetween(last || cell, cell), paintRef.current)
+    lastCellRef.current = cell
   }
 
-  const stopPainting = () => { paintRef.current = null }
+  const stopPainting = () => {
+    paintRef.current = null
+    lastCellRef.current = null
+  }
 
   return (
     <svg

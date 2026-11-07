@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Eraser } from 'lucide-react'
+import { ArrowLeft, Eraser, Trash2 } from 'lucide-react'
 import { fetchAllRooms } from '../api/meetingRooms'
 import DrawingGrid from '../components/floorplan/DrawingGrid'
-import FloorPlanCanvas from '../components/floorplan/FloorPlanCanvas'
+import FloorPlanCanvas, { CANVAS_COLS, CANVAS_ROWS } from '../components/floorplan/FloorPlanCanvas'
+import ShapeDetailModal from '../components/floorplan/ShapeDetailModal'
 import ShapePreview from '../components/floorplan/ShapePreview'
 import { useToast } from '../context/ToastContext'
 import { createEmptyGrid, detectPolygon } from '../utils/floorPlanGeometry'
@@ -13,9 +14,22 @@ const GRID_SIZE = 12
 const DEFAULT_HEIGHT = 250
 const MODES = [
   { key: 'edit', label: '編集', ready: true },
-  { key: 'view', label: '表示', ready: false },
+  { key: 'view', label: '表示', ready: true },
   { key: '3d', label: '3D表示（試用）', ready: false },
 ]
+
+// 既存の図形と1マス以上離れる最初の位置（左上から順に探す）。空きがなければ左上に置く
+function findFreeSpot(shapes, width, height) {
+  const overlaps = (x, y) => shapes.some((s) => (
+    x < s.x + s.width + 1 && x + width + 1 > s.x && y < s.y + s.height + 1 && y + height + 1 > s.y
+  ))
+  for (let y = 1; y + height <= CANVAS_ROWS; y++) {
+    for (let x = 1; x + width <= CANVAS_COLS; x++) {
+      if (!overlaps(x, y)) return { x, y }
+    }
+  }
+  return { x: 0, y: 0 }
+}
 
 export default function FloorPlanPage() {
   const { showToast } = useToast()
@@ -28,6 +42,22 @@ export default function FloorPlanPage() {
   // バックエンド未接続のため、配置した図形は画面内の状態としてのみ保持（再読み込みで消える）
   const [shapes, setShapes] = useState([])
   const [mode, setMode] = useState('edit')
+  const [selectedId, setSelectedId] = useState(null)
+  const [detailShape, setDetailShape] = useState(null)
+
+  const moveShape = (id, x, y) => {
+    setShapes((current) => current.map((s) => (s.id === id ? { ...s, x, y } : s)))
+  }
+
+  const deleteSelected = () => {
+    setShapes((current) => current.filter((s) => s.id !== selectedId))
+    setSelectedId(null)
+  }
+
+  const changeMode = (key) => {
+    setMode(key)
+    setSelectedId(null)
+  }
 
   useEffect(() => {
     fetchAllRooms().then(setRooms).catch(() => setRooms([]))
@@ -54,7 +84,7 @@ export default function FloorPlanPage() {
   }
 
   const handleUse = () => {
-    const offset = shapes.length % 10
+    const { x, y } = findFreeSpot(shapes, drawn.width, drawn.height)
     setShapes((current) => [...current, {
       id: crypto.randomUUID(),
       name: name.trim(),
@@ -63,8 +93,8 @@ export default function FloorPlanPage() {
       points: drawn.points,
       width: drawn.width,
       height: drawn.height,
-      x: 1 + offset * 2,
-      y: 1 + offset,
+      x,
+      y,
     }])
     setGrid(createEmptyGrid(GRID_SIZE))
     setDrawn(null)
@@ -149,16 +179,39 @@ export default function FloorPlanPage() {
                 role="tab"
                 aria-selected={mode === m.key}
                 className={`floor-plan-main__tab ${mode === m.key ? 'is-active' : ''}`}
-                onClick={() => setMode(m.key)}
+                onClick={() => changeMode(m.key)}
                 disabled={!m.ready}
                 title={m.ready ? undefined : '次のステップで実装予定'}
               >
                 {m.label}
               </button>
             ))}
+            <span className="floor-plan-main__hint">
+              {mode === 'edit' ? 'ドラッグで移動（1マス単位）' : 'クリックで詳細を表示'}
+            </span>
+            {mode === 'edit' && selectedId && (
+              <button type="button" className="floor-plan-main__delete" onClick={deleteSelected}>
+                <Trash2 size={14} />
+                選択中の図形を削除
+              </button>
+            )}
           </div>
-          <FloorPlanCanvas shapes={shapes} />
+          <FloorPlanCanvas
+            shapes={shapes}
+            mode={mode}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onMove={moveShape}
+            onShapeClick={setDetailShape}
+          />
         </section>
+        {detailShape && (
+          <ShapeDetailModal
+            shape={detailShape}
+            room={rooms.find((r) => r.id === detailShape.roomId)}
+            onClose={() => setDetailShape(null)}
+          />
+        )}
       </div>
     </div>
   )
