@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Bold, Search, Send, ThumbsUp } from 'lucide-react'
 import {
   fetchConversations, fetchMessages, openConversation, searchChatUsers,
@@ -286,6 +287,7 @@ export default function ChatPage() {
   const [conversations, setConversations] = useState([])
   const [activeId, setActiveId] = useState(null)
   const [extra, setExtra] = useState(null)
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const reload = useCallback(
     () => fetchConversations().then(setConversations).catch(() => {}),
@@ -298,7 +300,7 @@ export default function ChatPage() {
     return () => clearInterval(timer)
   }, [reload])
 
-  const openUser = async (userId) => {
+  const openUser = useCallback(async (userId) => {
     try {
       const conv = await openConversation(userId)
       setExtra(conv)
@@ -307,7 +309,19 @@ export default function ChatPage() {
     } catch {
       // 失敗時は何もしない（検索は閉じたまま）
     }
-  }
+  }, [reload])
+
+  // サイドバーの管理者一覧から ?with=<staffId> で遷移してきた場合、自動でその相手の会話を開く
+  useEffect(() => {
+    const withId = searchParams.get('with')
+    if (!withId) return
+    openUser(Number(withId))
+    setSearchParams((params) => {
+      params.delete('with')
+      return params
+    }, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const active = conversations.find((c) => c.id === activeId) || (extra?.id === activeId ? extra : null)
 

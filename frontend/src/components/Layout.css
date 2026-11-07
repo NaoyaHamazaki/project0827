@@ -54,6 +54,57 @@
   color: var(--color-primary);
 }
 
+.layout__group-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.layout__group-label {
+  flex: 1;
+  text-align: left;
+}
+
+.layout__group-chevron {
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.layout__group-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.layout__group-children {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 4px;
+}
+
+.layout__link--child {
+  padding-left: calc(var(--space-3) + 30px);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.layout__link--empty {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  cursor: default;
+}
+
+.layout__link--empty:hover {
+  background-color: transparent;
+}
+
+.layout__nav-divider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-2) var(--space-3);
+}
+
 .layout__footer {
   border-top: 1px solid var(--color-border);
   padding-top: var(--space-4);

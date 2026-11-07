@@ -13,10 +13,13 @@ import {
   Delete,
   Camera,
   UserCircle2,
+  History,
 } from 'lucide-react'
 import { scanCard, fetchRecentLogs, fetchMyQr, fetchMyStatus } from '../api/access'
 import { getReaderStatus, startReader } from '../api/readerAgent'
 import { fetchOrgSettings } from '../api/orgSettings'
+import Modal from '../components/Modal'
+import MyHistoryPage from './MyHistoryPage'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { useToast } from '../context/ToastContext'
@@ -603,6 +606,7 @@ function UserQrView() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [status, setStatus] = useState({ log: null, usage: null })
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const canvasRef = useRef(null)
 
   const loadQr = useCallback(async () => {
@@ -685,7 +689,22 @@ function UserQrView() {
           <span className="user-qr-card__cardid-label">{t('カードID')}</span>
           <span className="user-qr-card__cardid-value">{qrData.card_identifier}</span>
         </div>
+        <button
+          type="button"
+          className="user-qr-card__history-btn"
+          onClick={() => setIsHistoryOpen(true)}
+        >
+          <History size={16} />
+          {t('利用履歴')}
+        </button>
       </div>
+      {isHistoryOpen && (
+        <Modal title={t('利用履歴')} onClose={() => setIsHistoryOpen(false)}>
+          <div className="user-qr-history-modal">
+            <MyHistoryPage />
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

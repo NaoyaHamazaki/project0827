@@ -43,7 +43,10 @@ class ChatUserSearchView(APIView):
 
     def get(self, request):
         q = request.query_params.get('q', '').strip()
+        role = request.query_params.get('role', '').strip()
         qs = Staff.objects.filter(is_active=True).exclude(pk=request.user.pk)
+        if role in Staff.Role.values:
+            qs = qs.filter(role=role)
         if q:
             qs = qs.filter(
                 Q(first_name__icontains=q) | Q(last_name__icontains=q)

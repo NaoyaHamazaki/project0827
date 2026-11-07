@@ -12,6 +12,7 @@ import SettingsPage from './pages/SettingsPage'
 import SecurityInfoPage from './pages/SecurityInfoPage'
 import MyHistoryPage from './pages/MyHistoryPage'
 import ChatPage from './pages/ChatPage'
+import PlaceholderPage from './pages/PlaceholderPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -82,6 +83,57 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/reception-settings"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="受付設定" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat-settings"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="チャット設定" />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/meeting-rooms/book" element={<PlaceholderPage title="会議室予約" />} />
+        <Route
+          path="/meeting-rooms/status"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="予約状況" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meeting-rooms/settings"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="会議室設定" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="注文一覧" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/menu-settings"
+          element={
+            <ProtectedRoute adminOnly>
+              <PlaceholderPage title="メニュー設定" />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/orders/new" element={<PlaceholderPage title="注文" />} />
+        <Route path="/account-settings" element={<PlaceholderPage title="設定" />} />
       </Route>
     </Routes>
   )

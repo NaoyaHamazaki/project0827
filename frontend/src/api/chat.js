@@ -5,6 +5,11 @@ export async function searchChatUsers(q) {
   return data
 }
 
+export async function fetchAdminChatTargets() {
+  const { data } = await client.get('/chat/users/', { params: { role: 'admin' } })
+  return data
+}
+
 export async function fetchConversations() {
   const { data } = await client.get('/chat/conversations/')
   return data
