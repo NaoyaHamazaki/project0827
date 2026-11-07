@@ -1,7 +1,9 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Eraser, Trash2 } from 'lucide-react'
-import { fetchAllRooms } from '../api/meetingRooms'
+import { ArrowLeft, Eraser, History, Save, Trash2 } from 'lucide-react'
+import {
+  createFloorShape, fetchAllRooms, fetchFloorPlanItems, fetchFloorShapes, saveFloorPlanItems,
+} from '../api/meetingRooms'
 import DrawingGrid from '../components/floorplan/DrawingGrid'
 import FloorPlanCanvas, { CANVAS_COLS, CANVAS_ROWS } from '../components/floorplan/FloorPlanCanvas'
 import ShapeDetailModal from '../components/floorplan/ShapeDetailModal'
@@ -34,6 +36,37 @@ function findFreeSpot(shapes, width, height) {
   return { x: 0, y: 0 }
 }
 
+// サーバーの配置データ（points/room/wall_height）をキャンバス用の形に変換する
+function fromServerItem(item) {
+  return {
+    id: crypto.randomUUID(),
+    serverId: item.id,
+    shapeId: item.shape,
+    name: item.name,
+    roomId: item.room,
+    wallHeight: item.wall_height,
+    points: item.points,
+    width: item.width,
+    height: item.height,
+    x: item.x,
+    y: item.y,
+  }
+}
+
+function toServerItem(shape) {
+  return {
+    shape: shape.shapeId ?? null,
+    name: shape.name,
+    points: shape.points,
+    width: shape.width,
+    height: shape.height,
+    x: shape.x,
+    y: shape.y,
+    wall_height: shape.wallHeight,
+    room: shape.roomId,
+  }
+}
+
 export default function FloorPlanPage() {
   const { showToast } = useToast()
   const [rooms, setRooms] = useState([])
@@ -42,8 +75,10 @@ export default function FloorPlanPage() {
   const [name, setName] = useState('')
   const [roomId, setRoomId] = useState('')
   const [height, setHeight] = useState(DEFAULT_HEIGHT)
-  // バックエンド未接続のため、配置した図形は画面内の状態としてのみ保持（再読み込みで消える）
   const [shapes, setShapes] = useState([])
+  const [isLoadingLayout, setIsLoadingLayout] = useState(true)
+  const [isSavingLayout, setIsSavingLayout] = useState(false)
+  const [history, setHistory] = useState([])
   const [mode, setMode] = useState('edit')
   const [selectedId, setSelectedId] = useState(null)
   const [detailShape, setDetailShape] = useState(null)
@@ -62,8 +97,18 @@ export default function FloorPlanPage() {
     setSelectedId(null)
   }
 
+  const loadHistory = () => {
+    fetchFloorShapes().then(setHistory).catch(() => {})
+  }
+
   useEffect(() => {
     fetchAllRooms().then(setRooms).catch(() => setRooms([]))
+    loadHistory()
+    fetchFloorPlanItems()
+      .then((items) => setShapes(items.map(fromServerItem)))
+      .catch(() => showToast('配置済みの間取り図の取得に失敗しました', 'error'))
+      .finally(() => setIsLoadingLayout(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleGridChange = (updater) => {
@@ -86,11 +131,24 @@ export default function FloorPlanPage() {
     if (room && !name.trim()) setName(room.name)
   }
 
+  // 履歴から読み込んだ図形は、マス目・プレビューにそのまま復元して描画ボタン操作をやり直さずに再利用できるようにする
+  const handleReuseHistory = (entry) => {
+    setGrid(entry.cells)
+    setDrawn({
+      points: entry.points, width: entry.width, height: entry.height,
+      cells: entry.cells, vertexCells: [],
+    })
+    setName(entry.name || '')
+    showToast('描画欄に読み込みました。内容を確認して「この図を使用」を押してください')
+  }
+
   const handleUse = () => {
     const { x, y } = findFreeSpot(shapes, drawn.width, drawn.height)
+    const finalName = name.trim()
     setShapes((current) => [...current, {
       id: crypto.randomUUID(),
-      name: name.trim(),
+      shapeId: null,
+      name: finalName,
       roomId: roomId ? Number(roomId) : null,
       wallHeight: Number(height) || DEFAULT_HEIGHT,
       points: drawn.points,
@@ -99,6 +157,11 @@ export default function FloorPlanPage() {
       x,
       y,
     }])
+    // 履歴にも記録する（失敗しても配置自体は成立させるので待たない）
+    createFloorShape({
+      name: finalName, points: drawn.points, cells: grid, width: drawn.width, height: drawn.height,
+    }).then(loadHistory).catch(() => {})
+
     setGrid(createEmptyGrid(GRID_SIZE))
     setDrawn(null)
     setName('')
@@ -109,6 +172,19 @@ export default function FloorPlanPage() {
   const handleClear = () => {
     setGrid(createEmptyGrid(GRID_SIZE))
     setDrawn(null)
+  }
+
+  const handleSaveLayout = async () => {
+    setIsSavingLayout(true)
+    try {
+      const saved = await saveFloorPlanItems(shapes.map(toServerItem))
+      setShapes(saved.map(fromServerItem))
+      showToast('配置を保存しました')
+    } catch {
+      showToast('配置の保存に失敗しました', 'error')
+    } finally {
+      setIsSavingLayout(false)
+    }
   }
 
   return (
@@ -171,6 +247,27 @@ export default function FloorPlanPage() {
           >
             この図を使用
           </button>
+
+          <div className="floor-plan-panel__history">
+            <h2>
+              <History size={14} />
+              描画履歴
+            </h2>
+            {history.length === 0 && <p className="floor-plan-panel__history-empty">まだ履歴はありません</p>}
+            <ul>
+              {history.map((entry) => (
+                <li key={entry.id}>
+                  <div className="floor-plan-panel__history-info">
+                    <span className="floor-plan-panel__history-name">{entry.name || '（名称なし）'}</span>
+                    <span className="floor-plan-panel__history-meta">{entry.width} × {entry.height}</span>
+                  </div>
+                  <button type="button" className="btn btn-secondary" onClick={() => handleReuseHistory(entry)}>
+                    この図形を使用
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </aside>
 
         <section className="floor-plan-main">
@@ -198,6 +295,17 @@ export default function FloorPlanPage() {
               <button type="button" className="floor-plan-main__delete" onClick={deleteSelected}>
                 <Trash2 size={14} />
                 選択中の図形を削除
+              </button>
+            )}
+            {mode === 'edit' && (
+              <button
+                type="button"
+                className="floor-plan-main__save"
+                onClick={handleSaveLayout}
+                disabled={isSavingLayout || isLoadingLayout}
+              >
+                <Save size={14} />
+                {isSavingLayout ? '保存中…' : '配置を保存'}
               </button>
             )}
           </div>

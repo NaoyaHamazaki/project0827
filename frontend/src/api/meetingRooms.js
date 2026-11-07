@@ -38,3 +38,23 @@ export async function cancelReservation(id) {
   const { data } = await client.post(`/meeting-rooms/reservations/${id}/cancel/`)
   return data
 }
+
+export async function fetchFloorShapes() {
+  const { data } = await client.get('/meeting-rooms/floor-shapes/')
+  return data
+}
+
+export async function createFloorShape(payload) {
+  const { data } = await client.post('/meeting-rooms/floor-shapes/', payload)
+  return data
+}
+
+export async function fetchFloorPlanItems() {
+  const { data } = await client.get('/meeting-rooms/floor-plan-items/')
+  return data
+}
+
+export async function saveFloorPlanItems(items) {
+  const { data } = await client.put('/meeting-rooms/floor-plan-items/', items)
+  return data
+}

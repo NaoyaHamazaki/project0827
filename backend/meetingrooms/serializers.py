@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import MeetingRoom, Reservation
+from .models import FloorPlanItem, FloorShape, MeetingRoom, Reservation
 
 
 class MeetingRoomSerializer(serializers.ModelSerializer):
@@ -43,3 +43,24 @@ class ReservationSerializer(serializers.ModelSerializer):
         if room is not None and not room.is_bookable:
             raise serializers.ValidationError('この会議室は現在予約できません')
         return attrs
+
+
+class FloorShapeSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FloorShape
+        fields = ('id', 'name', 'points', 'cells', 'width', 'height', 'created_by_name', 'created_at')
+        read_only_fields = ('id', 'created_by_name', 'created_at')
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return obj.created_by.get_full_name() or obj.created_by.username
+        return None
+
+
+class FloorPlanItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FloorPlanItem
+        fields = ('id', 'shape', 'name', 'points', 'width', 'height', 'x', 'y', 'wall_height', 'room')
+        read_only_fields = ('id',)

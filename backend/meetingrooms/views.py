@@ -6,8 +6,10 @@ from rest_framework.views import APIView
 
 from accounts.permissions import IsAdmin
 
-from .models import MeetingRoom, Reservation
-from .serializers import MeetingRoomSerializer, ReservationSerializer
+from .models import FloorPlanItem, FloorShape, MeetingRoom, Reservation
+from .serializers import (
+    FloorPlanItemSerializer, FloorShapeSerializer, MeetingRoomSerializer, ReservationSerializer,
+)
 
 
 class MeetingRoomViewSet(viewsets.ModelViewSet):
@@ -60,3 +62,32 @@ class ReservationCancelView(APIView):
         reservation.status = Reservation.Status.CANCELLED
         reservation.save(update_fields=['status'])
         return Response(ReservationSerializer(reservation).data)
+
+
+class FloorShapeListCreateView(generics.ListCreateAPIView):
+    """間取り図の描画履歴（「この図を使用」で保存し、「この図形を使用」で呼び出す。管理者専用）"""
+
+    serializer_class = FloorShapeSerializer
+    permission_classes = (IsAdmin,)
+    queryset = FloorShape.objects.all()
+    pagination_class = None
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class FloorPlanItemsView(APIView):
+    """キャンバスに配置済みの図形一式（取得・一括保存）。管理者専用"""
+
+    permission_classes = (IsAdmin,)
+
+    def get(self, request):
+        items = FloorPlanItem.objects.select_related('room')
+        return Response(FloorPlanItemSerializer(items, many=True).data)
+
+    def put(self, request):
+        serializer = FloorPlanItemSerializer(data=request.data, many=True)
+        serializer.is_valid(raise_exception=True)
+        FloorPlanItem.objects.all().delete()
+        FloorPlanItem.objects.bulk_create([FloorPlanItem(**item) for item in serializer.validated_data])
+        return Response(FloorPlanItemSerializer(FloorPlanItem.objects.select_related('room'), many=True).data)
