@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Trash2, LayoutGrid } from 'lucide-react'
 import { createRoom, deleteRoom, fetchAllRooms, updateRoom } from '../api/meetingRooms'
 import { useLanguage } from '../context/LanguageContext'
@@ -8,6 +9,7 @@ import './MeetingRoomSettingsPage.css'
 export default function MeetingRoomSettingsPage() {
   const { t } = useLanguage()
   const { showToast } = useToast()
+  const navigate = useNavigate()
   const [rooms, setRooms] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [newName, setNewName] = useState('')
@@ -126,8 +128,11 @@ export default function MeetingRoomSettingsPage() {
           {t('間取り図')}
         </h2>
         <p className="settings-page__section-desc">
-          {t('間取り図を作成する機能は今後追加予定です（詳細は別途ご相談のうえ実装します）。')}
+          {t('マス目で会議室の形を描き、間取り図として配置できます。')}
         </p>
+        <button type="button" className="btn btn-primary" onClick={() => navigate('/meeting-rooms/settings/floor-plan')}>
+          {t('間取り図を作成する')}
+        </button>
       </section>
     </div>
   )

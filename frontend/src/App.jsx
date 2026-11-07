@@ -18,6 +18,7 @@ import ChatSettingsPage from './pages/ChatSettingsPage'
 import MeetingRoomBookingPage from './pages/MeetingRoomBookingPage'
 import MeetingRoomStatusPage from './pages/MeetingRoomStatusPage'
 import MeetingRoomSettingsPage from './pages/MeetingRoomSettingsPage'
+import FloorPlanPage from './pages/FloorPlanPage'
 import OrderPage from './pages/OrderPage'
 import OrderListPage from './pages/OrderListPage'
 import OrderMenuSettingsPage from './pages/OrderMenuSettingsPage'
@@ -121,6 +122,14 @@ export default function App() {
           element={
             <ProtectedRoute adminOnly>
               <MeetingRoomSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meeting-rooms/settings/floor-plan"
+          element={
+            <ProtectedRoute adminOnly>
+              <FloorPlanPage />
             </ProtectedRoute>
           }
         />

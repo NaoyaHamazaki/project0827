@@ -1,0 +1,229 @@
+.floor-plan-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  --floor-room-fill: #1b6082;
+}
+
+.floor-plan-page__header h1 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.floor-plan-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.floor-plan-page__back:hover {
+  color: var(--color-primary);
+}
+
+.floor-plan-page__body {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+/* 左パネル */
+.floor-plan-panel {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.floor-plan-panel__grid-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.floor-plan-panel__clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.floor-plan-panel__clear:hover {
+  color: var(--color-danger);
+}
+
+.floor-plan-grid {
+  width: 100%;
+  aspect-ratio: 1;
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+  user-select: none;
+}
+
+.floor-plan-grid__cell {
+  fill: #fff;
+  stroke: #444;
+  stroke-width: 0.03;
+}
+
+.floor-plan-grid__cell.is-selected {
+  fill: #d6e6f7;
+}
+
+.floor-plan-grid__cell.is-vertex {
+  fill: #9fc4ea;
+}
+
+.floor-plan-panel__draw,
+.floor-plan-panel__use {
+  align-self: center;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.floor-plan-preview {
+  height: 200px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: #fff;
+}
+
+.floor-plan-preview svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.floor-plan-preview--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.floor-plan-shape {
+  fill: var(--floor-room-fill);
+}
+
+.floor-plan-panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* 右側キャンバス */
+.floor-plan-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.floor-plan-main__tabs {
+  display: flex;
+}
+
+.floor-plan-main__tab {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  color: var(--color-text-muted);
+}
+
+.floor-plan-main__tab + .floor-plan-main__tab {
+  border-left: none;
+}
+
+.floor-plan-main__tab.is-active {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.floor-plan-main__tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.floor-plan-canvas {
+  position: relative;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  background-color: #fff;
+}
+
+.floor-plan-canvas svg {
+  display: block;
+}
+
+.floor-plan-canvas__grid-line {
+  fill: none;
+  stroke: #eef0f3;
+  stroke-width: 1;
+}
+
+.floor-plan-canvas__label-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.floor-plan-canvas__label {
+  background-color: #fff;
+  border: 1px solid #333;
+  padding: 2px 6px;
+  font-size: 12px;
+  color: #222;
+}
+
+.floor-plan-canvas__empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+@media (max-width: 960px) {
+  .floor-plan-page__body {
+    flex-direction: column;
+  }
+
+  .floor-plan-panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .floor-plan-main {
+    width: 100%;
+  }
+}
