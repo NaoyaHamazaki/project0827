@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Minus, Plus, ClipboardCheck } from 'lucide-react'
+import { Armchair, Minus, Plus, ClipboardCheck } from 'lucide-react'
 import { fetchBookableRooms } from '../api/meetingRooms'
 import { createOrder, fetchAvailableMenuItems, fetchOrderSettings } from '../api/orders'
 import Modal from '../components/Modal'
@@ -92,18 +92,17 @@ export default function OrderPage() {
 
       <section className="order-page__section">
         <h2>{t('会議室名')}</h2>
-        <div className="order-page__radio-list">
+        <div className="order-page__card-grid">
           {rooms.map((room) => (
-            <label key={room.id} className="order-page__radio">
-              <input
-                type="radio"
-                name="order-room"
-                value={room.id}
-                checked={String(roomId) === String(room.id)}
-                onChange={() => setRoomId(room.id)}
-              />
+            <button
+              key={room.id}
+              type="button"
+              className={`order-page__room-card ${String(roomId) === String(room.id) ? 'is-selected' : ''}`}
+              onClick={() => setRoomId(room.id)}
+            >
+              <Armchair size={24} strokeWidth={1.5} />
               <span>{room.name}</span>
-            </label>
+            </button>
           ))}
           {rooms.length === 0 && <p className="order-page__empty">{t('利用できる会議室がありません')}</p>}
         </div>
@@ -111,14 +110,14 @@ export default function OrderPage() {
 
       <section className="order-page__section">
         <h2>{t('メニュー')}</h2>
-        <div className="order-page__menu-list">
+        <div className="order-page__card-grid">
           {menuItems.map((item) => {
             const qty = quantities[item.id] || 0
             return (
-              <div key={item.id} className={`order-page__menu-item ${qty > 0 ? 'is-selected' : ''}`}>
+              <div key={item.id} className={`order-page__menu-card ${qty > 0 ? 'is-selected' : ''}`}>
                 <button
                   type="button"
-                  className="order-page__menu-btn"
+                  className="order-page__menu-card-btn"
                   onClick={() => handlePickItem(item)}
                 >
                   {item.name}

@@ -41,6 +41,7 @@ export const ADMIN_NAV_GROUPS = [
     label: '注文',
     dividerAfter: true,
     items: [
+      { to: '/orders/new', label: '注文画面' },
       { to: '/orders', end: true, label: '注文一覧' },
       { to: '/orders/menu-settings', label: 'メニュー設定' },
     ],
