@@ -43,3 +43,17 @@ export async function fetchDebugTableRows(table) {
   const { data } = await client.get('/orgsettings/debug-tables/rows/', { params: { table } })
   return data
 }
+
+export async function fetchAnnouncements() {
+  const { data } = await client.get('/orgsettings/announcements/')
+  return data
+}
+
+export async function createAnnouncement(payload) {
+  const { data } = await client.post('/orgsettings/announcements/', payload)
+  return data
+}
+
+export async function deleteAnnouncement(id) {
+  await client.delete(`/orgsettings/announcements/${id}/`)
+}

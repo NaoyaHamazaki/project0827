@@ -1,6 +1,12 @@
+import secrets
 import uuid
+from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
+from django.utils import timezone
+
+INVITE_TTL = timedelta(hours=24)
 
 
 class Plan(models.Model):
@@ -47,3 +53,40 @@ class Member(models.Model):
 
     def __str__(self):
         return f'{self.name}（{self.company_name}）'
+
+
+def _generate_token():
+    return secrets.token_urlsafe(24)
+
+
+class MemberInvite(models.Model):
+    """会員の自己登録用招待リンク（QR表示／URLをコピーのどちらでも使う）。
+    有効期限付き・1回限り：使用済みまたは期限切れのトークンは登録に使えない。
+    """
+
+    token = models.CharField('トークン', max_length=64, unique=True, default=_generate_token)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='member_invites',
+    )
+    expires_at = models.DateTimeField('有効期限')
+    used_at = models.DateTimeField('使用日時', null=True, blank=True)
+    created_member = models.ForeignKey(
+        Member, on_delete=models.SET_NULL, null=True, blank=True, related_name='invite',
+    )
+    created_at = models.DateTimeField('発行日時', auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'招待{self.token[:8]}…（{"使用済み" if self.used_at else "未使用"}）'
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + INVITE_TTL
+        super().save(*args, **kwargs)
+
+    @property
+    def is_valid(self):
+        return self.used_at is None and self.expires_at > timezone.now()

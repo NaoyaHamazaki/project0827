@@ -45,3 +45,28 @@ export async function updatePlan(id, payload) {
 export async function deletePlan(id) {
   await client.delete(`/members/plans/${id}/`)
 }
+
+export async function registerMemberByAdmin(payload) {
+  const { data } = await client.post('/members/register/', payload)
+  return data
+}
+
+export async function createMemberInvite() {
+  const { data } = await client.post('/members/invites/')
+  return data
+}
+
+export async function fetchInviteStatus(token) {
+  const { data } = await client.get(`/members/invites/${token}/`)
+  return data
+}
+
+export async function submitInviteRegistration(token, payload) {
+  const { data } = await client.post(`/members/invites/${token}/register/`, payload)
+  return data
+}
+
+export async function fetchPublicPlans() {
+  const { data } = await client.get('/members/invites/public-plans/')
+  return data
+}

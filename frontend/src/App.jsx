@@ -25,6 +25,9 @@ import OrderMenuSettingsPage from './pages/OrderMenuSettingsPage'
 import TopPage from './pages/TopPage'
 import SettingsAccountPage from './pages/SettingsAccountPage'
 import TableInfoPage from './pages/TableInfoPage'
+import AnnouncementsPage from './pages/AnnouncementsPage'
+import MemberCreatePage from './pages/MemberCreatePage'
+import RegisterPage from './pages/RegisterPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -45,6 +48,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register/:token" element={<RegisterPage />} />
       <Route
         element={
           <ProtectedRoute>
@@ -75,7 +79,7 @@ export default function App() {
           path="/members/new"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="新規会員作成" />
+              <MemberCreatePage />
             </ProtectedRoute>
           }
         />
@@ -123,7 +127,7 @@ export default function App() {
           path="/announcements"
           element={
             <ProtectedRoute adminOnly>
-              <PlaceholderPage title="アップデート情報" />
+              <AnnouncementsPage />
             </ProtectedRoute>
           }
         />

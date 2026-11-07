@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 from accounts.permissions import IsAdmin
 
 from .dispatch import send_webhook
-from .models import OrgSettings, Webhook
-from .serializers import OrgSettingsSerializer, WebhookSerializer
+from .models import Announcement, OrgSettings, Webhook
+from .serializers import AnnouncementSerializer, OrgSettingsSerializer, WebhookSerializer
 
 # テーブル確認（開発用）で表示対象とする自アプリの一覧。
 # Django組み込みのauth/admin/sessions等は対象外にする。
@@ -32,6 +32,8 @@ DEBUG_TABLE_DESCRIPTIONS = {
     'cards.CardLoan': 'セキュリティカードの貸出〜返却の記録',
     'orgsettings.OrgSettings': '入力方式・CSV出力列などの運用設定（1件のみ）',
     'orgsettings.Webhook': '入退室イベントを外部URLへ通知するWebhookの登録情報',
+    'orgsettings.Announcement': 'お知らせ＞アップデート情報に表示する記事',
+    'members.MemberInvite': '会員の自己登録用招待リンク（有効期限・使用済みフラグ付き）',
     'chat.Conversation': 'チャットの会話単位（1対1）',
     'chat.Participant': 'チャット会話の参加者（既読状況を含む）',
     'chat.Message': 'チャットの送信メッセージ本文',
@@ -131,3 +133,15 @@ class WebhookViewSet(viewsets.ModelViewSet):
                 {'success': False, 'error': str(exc)}, status=status.HTTP_502_BAD_GATEWAY,
             )
         return Response({'success': True})
+
+
+class AnnouncementViewSet(viewsets.ModelViewSet):
+    """お知らせ＞アップデート情報の一覧・作成・削除（管理者専用）"""
+
+    serializer_class = AnnouncementSerializer
+    permission_classes = (IsAdmin,)
+    queryset = Announcement.objects.all()
+    pagination_class = None
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)

@@ -1,0 +1,99 @@
+@import './SettingsPage.css';
+
+.member-create-page h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.member-create-page__desc {
+  margin: 0 0 var(--space-5);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.member-create-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+.member-create-page__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+}
+
+.member-create-page__card:hover {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.member-create-page__card span {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.member-create-page__card small {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.member-create-page__input-with-btn {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.member-create-page__input-with-btn input {
+  flex: 1;
+}
+
+.member-create-page__input-with-btn .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.member-create-page__invite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.member-create-page__invite-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.member-create-page__qr {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.member-create-page__url-row {
+  display: flex;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.member-create-page__url-row input {
+  flex: 1;
+  font-size: 12px;
+}
+
+.member-create-page__invite-expires {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}

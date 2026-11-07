@@ -1,10 +1,13 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import DebugTableListView, DebugTableRowsView, OrgSettingsView, WebhookViewSet
+from .views import (
+    AnnouncementViewSet, DebugTableListView, DebugTableRowsView, OrgSettingsView, WebhookViewSet,
+)
 
 router = DefaultRouter()
 router.register('webhooks', WebhookViewSet, basename='webhook')
+router.register('announcements', AnnouncementViewSet, basename='announcement')
 
 urlpatterns = [
     path('', OrgSettingsView.as_view(), name='org-settings'),

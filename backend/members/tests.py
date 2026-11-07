@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 from accounts.models import Staff
 from access.models import AccessLog
 
-from .models import Member, Plan
+from .models import Member, MemberInvite, Plan
 from .usage import calculate_usage
 
 
@@ -153,3 +153,116 @@ class CalculateUsageTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['visit_count'], 1)
         self.assertEqual(response.data['used_hours'], 1.5)
+
+
+class MemberRegistrationTests(APITestCase):
+    def setUp(self):
+        self.admin = Staff.objects.create_user(
+            username='reg-admin', email='reg-admin@example.com', password='pass12345',
+            role=Staff.Role.ADMIN,
+        )
+        self.user = Staff.objects.create_user(
+            username='reg-user', email='reg-user@example.com', password='pass12345',
+            role=Staff.Role.USER,
+        )
+
+    def test_admin_can_register_member_with_login(self):
+        self.client.force_authenticate(self.admin)
+        r = self.client.post(reverse('member-admin-register'), {
+            'name': '新規太郎', 'company_name': 'C社', 'email': 'new-taro@example.com',
+            'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        member = Member.objects.get(name='新規太郎')
+        staff = Staff.objects.get(email='new-taro@example.com')
+        self.assertEqual(staff.member, member)
+        self.assertEqual(staff.role, Staff.Role.USER)
+        self.assertTrue(staff.check_password('a-strong-pass-999'))
+
+    def test_non_admin_cannot_register_member(self):
+        self.client.force_authenticate(self.user)
+        r = self.client.post(reverse('member-admin-register'), {
+            'name': 'x', 'email': 'blocked@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 403)
+
+    def test_duplicate_email_rejected(self):
+        self.client.force_authenticate(self.admin)
+        r = self.client.post(reverse('member-admin-register'), {
+            'name': 'x', 'email': self.user.email, 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 400)
+
+
+class MemberInviteTests(APITestCase):
+    def setUp(self):
+        self.admin = Staff.objects.create_user(
+            username='inv-admin', email='inv-admin@example.com', password='pass12345',
+            role=Staff.Role.ADMIN,
+        )
+        self.user = Staff.objects.create_user(
+            username='inv-user', email='inv-user@example.com', password='pass12345',
+            role=Staff.Role.USER,
+        )
+
+    def test_non_admin_cannot_create_invite(self):
+        self.client.force_authenticate(self.user)
+        r = self.client.post(reverse('member-invite-create'))
+        self.assertEqual(r.status_code, 403)
+
+    def test_admin_can_create_invite_and_anyone_can_check_status(self):
+        self.client.force_authenticate(self.admin)
+        r = self.client.post(reverse('member-invite-create'))
+        self.assertEqual(r.status_code, 201, r.data)
+        token = r.data['token']
+
+        self.client.force_authenticate(None)
+        r = self.client.get(reverse('member-invite-status', args=[token]))
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.data['valid'])
+
+    def test_self_register_with_valid_token_creates_member_and_marks_used(self):
+        invite = MemberInvite.objects.create(created_by=self.admin)
+        r = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': '自己登録太郎', 'email': 'self-taro@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        invite.refresh_from_db()
+        self.assertIsNotNone(invite.used_at)
+        self.assertEqual(invite.created_member.name, '自己登録太郎')
+
+    def test_self_register_with_used_token_rejected(self):
+        invite = MemberInvite.objects.create(created_by=self.admin, used_at=timezone.now())
+        r = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': 'x', 'email': 'blocked2@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 410)
+
+    def test_self_register_with_expired_token_rejected(self):
+        invite = MemberInvite.objects.create(
+            created_by=self.admin, expires_at=timezone.now() - timedelta(hours=1),
+        )
+        r = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': 'x', 'email': 'blocked3@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 410)
+
+    def test_self_register_without_card_identifier_autogenerates_one(self):
+        invite = MemberInvite.objects.create(created_by=self.admin)
+        r = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': '自動カード太郎', 'email': 'auto-card@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        member = Member.objects.get(name='自動カード太郎')
+        self.assertTrue(member.card_identifier.startswith('SELF-'))
+
+    def test_token_cannot_be_reused(self):
+        invite = MemberInvite.objects.create(created_by=self.admin)
+        r1 = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': '一人目', 'email': 'first@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r1.status_code, 201, r1.data)
+        r2 = self.client.post(reverse('member-invite-register', args=[invite.token]), {
+            'name': '二人目', 'email': 'second@example.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r2.status_code, 410)

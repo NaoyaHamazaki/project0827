@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Member, Plan
+from .models import Member, MemberInvite, Plan
 
 
 @admin.register(Member)
@@ -14,3 +14,9 @@ class MemberAdmin(admin.ModelAdmin):
 class PlanAdmin(admin.ModelAdmin):
     list_display = ('name', 'monthly_hour_limit', 'created_at')
     search_fields = ('name',)
+
+
+@admin.register(MemberInvite)
+class MemberInviteAdmin(admin.ModelAdmin):
+    list_display = ('token', 'created_by', 'expires_at', 'used_at', 'created_at')
+    list_filter = ('used_at',)

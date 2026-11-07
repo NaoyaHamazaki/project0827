@@ -108,3 +108,29 @@ class DispatchWebhooksTests(APITestCase):
         )
         with patch('orgsettings.dispatch.urllib.request.urlopen', side_effect=OSError('boom')):
             dispatch_webhooks('checkin', {'member_name': 'テスト太郎'})
+
+
+class AnnouncementTests(APITestCase):
+    def setUp(self):
+        self.admin = Staff.objects.create_user(
+            username='ann-admin', email='ann-admin@example.com', password='pass12345',
+            role=Staff.Role.ADMIN,
+        )
+        self.user = Staff.objects.create_user(
+            username='ann-user', email='ann-user@example.com', password='pass12345',
+            role=Staff.Role.USER,
+        )
+
+    def test_admin_can_create_and_list_announcements(self):
+        self.client.force_authenticate(self.admin)
+        r = self.client.post(reverse('announcement-list'), {'title': 'お知らせ1', 'body': '本文です'})
+        self.assertEqual(r.status_code, 201, r.data)
+        self.assertEqual(r.data['created_by_name'], self.admin.get_full_name() or self.admin.username)
+
+        r = self.client.get(reverse('announcement-list'))
+        self.assertEqual(len(r.data), 1)
+
+    def test_non_admin_cannot_access_announcements(self):
+        self.client.force_authenticate(self.user)
+        r = self.client.get(reverse('announcement-list'))
+        self.assertEqual(r.status_code, 403)
