@@ -47,8 +47,19 @@
   box-shadow: var(--shadow-md, 0 6px 16px rgba(0, 0, 0, 0.1));
 }
 
+/* スマホ縦向きでは1列。正方形のままだと縦に長くなりすぎるので、アイコン＋文字の横長カードにする */
 @media (max-width: 600px) {
   .top-page__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .top-page__card {
+    flex-direction: row;
+    justify-content: flex-start;
+    aspect-ratio: auto;
+    min-height: 72px;
+    padding: 0 var(--space-5);
+    gap: var(--space-4);
   }
 }

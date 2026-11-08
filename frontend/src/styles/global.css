@@ -31,6 +31,8 @@ select,
 textarea {
   font-size: 16px;
 }
+/* 画面ごとのCSSで16px未満にした入力欄は、各ファイルで
+   @media (pointer: coarse) により16pxへ戻すこと（PCでの見た目は維持できる） */
 
 button {
   cursor: pointer;

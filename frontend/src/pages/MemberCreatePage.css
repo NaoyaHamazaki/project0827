@@ -97,3 +97,10 @@
   font-size: 12px;
   color: var(--color-text-muted);
 }
+
+/* タッチ端末では16px未満だとフォーカス時にiOSが自動ズームするため */
+@media (pointer: coarse) {
+  .member-create-page__url-row input {
+    font-size: 16px;
+  }
+}

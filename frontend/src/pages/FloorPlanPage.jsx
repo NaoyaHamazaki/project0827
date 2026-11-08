@@ -87,6 +87,10 @@ export default function FloorPlanPage() {
     setShapes((current) => current.map((s) => (s.id === id ? { ...s, x, y } : s)))
   }
 
+  const resizeShape = (id, { width, height, points }) => {
+    setShapes((current) => current.map((s) => (s.id === id ? { ...s, width, height, points } : s)))
+  }
+
   const deleteSelected = () => {
     setShapes((current) => current.filter((s) => s.id !== selectedId))
     setSelectedId(null)
@@ -287,7 +291,7 @@ export default function FloorPlanPage() {
               </button>
             ))}
             <span className="floor-plan-main__hint">
-              {mode === 'edit' && 'ドラッグで移動（1マス単位）'}
+              {mode === 'edit' && 'ドラッグで移動／右下の□で拡大縮小'}
               {mode === 'view' && 'クリックで詳細を表示'}
               {mode === '3d' && 'ベータ版：高さを反映した立体表示です'}
             </span>
@@ -320,6 +324,7 @@ export default function FloorPlanPage() {
               selectedId={selectedId}
               onSelect={setSelectedId}
               onMove={moveShape}
+              onResize={resizeShape}
               onShapeClick={setDetailShape}
             />
           )}

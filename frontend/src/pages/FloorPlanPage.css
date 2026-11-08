@@ -218,6 +218,8 @@
   border: 1px solid var(--color-border);
   border-bottom: none;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .floor-plan-main__tab + .floor-plan-main__tab {
@@ -256,6 +258,25 @@
 
 .floor-plan-canvas__edge-labels {
   pointer-events: none;
+}
+
+.floor-plan-canvas__frame {
+  fill: none;
+  stroke: #6b7280;
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+.floor-plan-canvas__resize-handle {
+  fill: #fff;
+  stroke: #f59e0b;
+  stroke-width: 2;
+  cursor: nwse-resize;
+}
+
+.floor-plan-canvas__resize-handle:hover {
+  fill: #fde68a;
 }
 
 .floor-plan-canvas__edge-labels rect {
@@ -329,8 +350,15 @@
 
 .floor-plan-main__hint {
   margin-left: var(--space-3);
+  min-width: 0;
   font-size: 12px;
   color: var(--color-text-muted);
+}
+
+.floor-plan-main__delete,
+.floor-plan-main__save {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .floor-plan-main__delete {
