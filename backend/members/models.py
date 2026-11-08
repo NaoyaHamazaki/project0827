@@ -91,11 +91,27 @@ def _generate_token():
 
 
 class MemberInvite(models.Model):
-    """会員の自己登録用招待リンク（QR表示／URLをコピーのどちらでも使う）。
+    """アカウント発行用の招待リンク（QR表示／URLをコピーのどちらでも使う）。
+    マスター→管理者、管理者→代表、代表→ユーザーの3段階で発行する。
     有効期限付き・1回限り：使用済みまたは期限切れのトークンは登録に使えない。
     """
 
+    class TargetRole(models.TextChoices):
+        ADMIN = 'admin', '管理者'
+        REPRESENTATIVE = 'representative', 'ユーザー（代表）'
+        USER = 'user', 'ユーザー'
+
     token = models.CharField('トークン', max_length=64, unique=True, default=_generate_token)
+    target_role = models.CharField(
+        '発行する権限', max_length=20, choices=TargetRole.choices, default=TargetRole.REPRESENTATIVE,
+    )
+    site = models.ForeignKey(
+        'tenants.Site', on_delete=models.CASCADE, null=True, blank=True, related_name='invites',
+    )
+    company = models.ForeignKey(
+        'tenants.Company', on_delete=models.CASCADE, null=True, blank=True, related_name='invites',
+        help_text='ユーザー招待のとき、参加先の所属',
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='member_invites',

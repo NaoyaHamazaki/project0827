@@ -4,7 +4,7 @@ import { LogOut, Menu, X, ChevronDown, Home } from 'lucide-react'
 import { fetchChatUnread } from '../api/chat'
 import { useAuth } from '../context/AuthContext'
 import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext'
-import { ADMIN_NAV_GROUPS, USER_NAV_ITEMS, findActiveGroup } from '../navConfig'
+import { adminGroupsFor, findActiveGroup, userItemsFor } from '../navConfig'
 import MiniNav from './MiniNav'
 import './Layout.css'
 
@@ -84,7 +84,7 @@ function NavGroup({ icon: Icon, label, items, badge, isActiveGroup }) {
 }
 
 export default function Layout() {
-  const { staff, isAdmin, logout } = useAuth()
+  const { staff, isAdmin, isMaster, isRepresentative, logout } = useAuth()
   const { t } = useLanguage()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const location = useLocation()
@@ -105,7 +105,8 @@ export default function Layout() {
   }, [location.pathname])
 
   const badges = { chat: chatUnread }
-  const activeGroup = isAdmin ? findActiveGroup(ADMIN_NAV_GROUPS, location.pathname) : null
+  const adminGroups = adminGroupsFor(isMaster)
+  const activeGroup = isAdmin ? findActiveGroup(adminGroups, location.pathname) : null
 
   return (
     <div className="layout">
@@ -128,7 +129,7 @@ export default function Layout() {
             {t('トップ')}
           </NavLink>
           {isAdmin ? (
-            ADMIN_NAV_GROUPS.map((group) => (
+            adminGroups.map((group) => (
               <Fragment key={group.key}>
                 <NavGroup
                   icon={group.icon}
@@ -141,7 +142,7 @@ export default function Layout() {
               </Fragment>
             ))
           ) : (
-            USER_NAV_ITEMS.map((item) => (
+            userItemsFor(isRepresentative).map((item) => (
               <NavLink key={item.key} to={item.to} end={item.end} className="layout__link">
                 <item.icon size={18} />
                 {t(item.label)}

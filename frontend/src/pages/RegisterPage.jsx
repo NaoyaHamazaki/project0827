@@ -5,6 +5,13 @@ import { fetchInviteStatus, fetchPublicPlans, submitInviteRegistration } from '.
 import { useLanguage } from '../context/LanguageContext'
 import './RegisterPage.css'
 
+// 招待の種類ごとの見出しと、登録後に案内するログイン画面
+const INVITE_KINDS = {
+  admin: { title: '管理者アカウント登録', lead: 'ログイン情報を登録してください。表示名は空欄なら自動で付きます', login: '/staff/login' },
+  representative: { title: '代表者アカウント登録', lead: '所属（会社名）とご自身の情報を入力してください', login: '/login' },
+  user: { title: 'メンバー登録', lead: 'ご自身の情報を入力してください', login: '/login' },
+}
+
 const EMPTY_FORM = {
   name: '', company_name: '', email: '', plan: '', card_identifier: '', password: '', confirm: '',
 }
@@ -15,15 +22,17 @@ export default function RegisterPage() {
   const { t } = useLanguage()
   const [status, setStatus] = useState('checking') // checking | ready | invalid | done
   const [plans, setPlans] = useState([])
+  const [invite, setInvite] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     Promise.all([fetchInviteStatus(token), fetchPublicPlans()])
-      .then(([invite, planList]) => {
+      .then(([inviteData, planList]) => {
         setPlans(planList)
-        setStatus(invite.valid ? 'ready' : 'invalid')
+        setInvite(inviteData)
+        setStatus(inviteData.valid ? 'ready' : 'invalid')
       })
       .catch(() => setStatus('invalid'))
   }, [token])
@@ -60,6 +69,10 @@ export default function RegisterPage() {
     }
   }
 
+  const role = invite?.target_role || 'representative'
+  const kind = INVITE_KINDS[role] || INVITE_KINDS.representative
+  const isAdminInvite = role === 'admin'
+
   if (status === 'checking') {
     return <div className="register-page"><p className="register-page__status">{t('確認中…')}</p></div>
   }
@@ -82,7 +95,7 @@ export default function RegisterPage() {
           <CheckCircle2 size={40} strokeWidth={1.5} className="register-page__done-icon" />
           <h1>{t('登録が完了しました')}</h1>
           <p>{t('登録したメールアドレスとパスワードでログインしてください。')}</p>
-          <button type="button" className="btn btn-primary" onClick={() => navigate('/login')}>
+          <button type="button" className="btn btn-primary" onClick={() => navigate(kind.login)}>
             {t('ログイン画面へ')}
           </button>
         </div>
@@ -95,24 +108,31 @@ export default function RegisterPage() {
       <form className="register-page__card" onSubmit={handleSubmit}>
         <div className="register-page__header">
           <UserPlus size={28} strokeWidth={1.5} />
-          <h1>{t('会員登録')}</h1>
-          <p>{t('ご自身の情報を入力してください')}</p>
+          <h1>{t(kind.title)}</h1>
+          <p>{t(kind.lead)}</p>
+          <div className="register-page__context">
+            {invite?.site_name && <span>{t('所管')}: {invite.site_name}</span>}
+            {invite?.company_name && <span>{t('所属')}: {invite.company_name}</span>}
+          </div>
         </div>
 
         {error && <p className="register-page__error">{error}</p>}
 
         <div className="field">
-          <label htmlFor="rg-name">{t('氏名')}</label>
-          <input id="rg-name" value={form.name} onChange={set('name')} required autoFocus />
+          <label htmlFor="rg-name">{isAdminInvite ? t('表示名（任意）') : t('氏名')}</label>
+          <input id="rg-name" value={form.name} onChange={set('name')} required={!isAdminInvite} autoFocus />
         </div>
-        <div className="field">
-          <label htmlFor="rg-company">{t('所属企業名')}</label>
-          <input id="rg-company" value={form.company_name} onChange={set('company_name')} />
-        </div>
+        {role === 'representative' && (
+          <div className="field">
+            <label htmlFor="rg-company">{t('所属企業名')}</label>
+            <input id="rg-company" value={form.company_name} onChange={set('company_name')} required />
+          </div>
+        )}
         <div className="field">
           <label htmlFor="rg-email">{t('メールアドレス')}</label>
           <input id="rg-email" type="email" value={form.email} onChange={set('email')} required />
         </div>
+        {!isAdminInvite && (<>
         <div className="field">
           <label htmlFor="rg-plan">{t('プラン')}</label>
           <select id="rg-plan" value={form.plan} onChange={set('plan')}>
@@ -126,6 +146,7 @@ export default function RegisterPage() {
           <label htmlFor="rg-card">{t('カードID（お持ちの場合のみ）')}</label>
           <input id="rg-card" value={form.card_identifier} onChange={set('card_identifier')} />
         </div>
+        </>)}
         <div className="field">
           <label htmlFor="rg-password">{t('パスワード')}</label>
           <input id="rg-password" type="password" value={form.password} onChange={set('password')} required />

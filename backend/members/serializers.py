@@ -140,13 +140,42 @@ class AdminMemberRegisterSerializer(serializers.Serializer):
 class MemberInviteSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemberInvite
-        fields = ('token', 'expires_at')
+        fields = ('token', 'expires_at', 'target_role')
         read_only_fields = fields
 
 
 class InviteStatusSerializer(serializers.Serializer):
     valid = serializers.BooleanField()
     expires_at = serializers.DateTimeField(allow_null=True)
+    target_role = serializers.CharField()
+    site_name = serializers.CharField()
+    company_name = serializers.CharField()
+
+
+class AdminSelfRegisterSerializer(serializers.Serializer):
+    """マスターが発行した招待URLから、管理者が自分のログイン情報を登録する。
+    表示名は空欄なら「所管名_管理者01」のように自動で付く
+    """
+
+    name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate_email(self, value):
+        if Account.objects.filter(email=value).exists():
+            raise serializers.ValidationError('このメールアドレスは既に使用されています')
+        return value
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+    def create(self, validated_data):
+        return Account.objects.create_user(
+            username=_unique_username(validated_data['email']), email=validated_data['email'],
+            password=validated_data['password'], first_name=validated_data.get('name', ''),
+            role=Account.Role.ADMIN, site=validated_data['site'],
+        )
 
 
 class SelfRegisterSerializer(serializers.Serializer):

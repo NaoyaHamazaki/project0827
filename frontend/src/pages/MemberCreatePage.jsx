@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import QRCode from 'qrcode'
 import { ClipboardEdit, Copy, QrCode, Wand2 } from 'lucide-react'
-import { createMemberInvite, fetchPlans, registerMemberByAdmin } from '../api/members'
+import { fetchPlans, registerMemberByAdmin } from '../api/members'
 import Modal from '../components/Modal'
+import InviteLinkModal from '../components/InviteLinkModal'
 import { useLanguage } from '../context/LanguageContext'
 import { useToast } from '../context/ToastContext'
 import './MemberCreatePage.css'
@@ -122,71 +122,6 @@ function AdminFormModal({ plans, onClose, onCreated }) {
   )
 }
 
-function InviteLinkModal({ mode, onClose }) {
-  const { t } = useLanguage()
-  const { showToast } = useToast()
-  const canvasRef = useRef(null)
-  const [url, setUrl] = useState('')
-  const [expiresAt, setExpiresAt] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    createMemberInvite()
-      .then(({ token, expires_at }) => {
-        setUrl(`${window.location.origin}/register/${token}`)
-        setExpiresAt(expires_at)
-      })
-      .catch(() => showToast(t('招待リンクの発行に失敗しました'), 'error'))
-      .finally(() => setIsLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (mode === 'qr' && url && canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, url, { width: 220, margin: 1 }).catch(() => {})
-    }
-  }, [mode, url])
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      showToast(t('URLをコピーしました'))
-    } catch {
-      showToast(t('コピーに失敗しました'), 'error')
-    }
-  }
-
-  return (
-    <Modal title={mode === 'qr' ? t('QR表示') : t('URLをコピー')} onClose={onClose}>
-      {isLoading ? (
-        <p className="settings-page__loading">{t('発行中…')}</p>
-      ) : (
-        <div className="member-create-page__invite">
-          <p className="member-create-page__invite-desc">
-            {t('このリンクはご本人が情報を入力して登録するためのものです。24時間以内・1回のみ有効です。')}
-          </p>
-          {mode === 'qr' ? (
-            <canvas ref={canvasRef} className="member-create-page__qr" />
-          ) : (
-            <div className="member-create-page__url-row">
-              <input readOnly value={url} />
-              <button type="button" className="btn btn-primary" onClick={handleCopy}>
-                <Copy size={14} />
-                {t('コピー')}
-              </button>
-            </div>
-          )}
-          {expiresAt && (
-            <p className="member-create-page__invite-expires">
-              {t('有効期限')}: {new Date(expiresAt).toLocaleString('ja-JP')}
-            </p>
-          )}
-        </div>
-      )}
-    </Modal>
-  )
-}
-
 export default function MemberCreatePage() {
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -211,12 +146,12 @@ export default function MemberCreatePage() {
         <button type="button" className="member-create-page__card" onClick={() => setActiveModal('qr')}>
           <QrCode size={32} strokeWidth={1.5} />
           <span>{t('QR表示')}</span>
-          <small>{t('ご本人のスマホで読み取ってもらい、入力してもらいます')}</small>
+          <small>{t('代表者のスマホで読み取ってもらい、所属と本人情報を入力してもらいます')}</small>
         </button>
         <button type="button" className="member-create-page__card" onClick={() => setActiveModal('url')}>
           <Copy size={32} strokeWidth={1.5} />
           <span>{t('URLをコピー')}</span>
-          <small>{t('メールなどでご本人に送って入力してもらいます')}</small>
+          <small>{t('メールなどで代表者に送って入力してもらいます')}</small>
         </button>
       </div>
 
@@ -228,7 +163,7 @@ export default function MemberCreatePage() {
         />
       )}
       {(activeModal === 'qr' || activeModal === 'url') && (
-        <InviteLinkModal mode={activeModal} onClose={() => setActiveModal(null)} />
+        <InviteLinkModal mode={activeModal} targetLabel="ユーザー（代表）" onClose={() => setActiveModal(null)} />
       )}
     </div>
   )

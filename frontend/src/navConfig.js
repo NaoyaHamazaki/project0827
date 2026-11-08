@@ -1,5 +1,5 @@
 import {
-  Armchair, ClipboardCheck, MessageCircle, Megaphone, ScanLine, Settings, Users,
+  Armchair, Building2, ClipboardCheck, MessageCircle, Megaphone, ScanLine, Settings, UserPlus, Users,
 } from 'lucide-react'
 
 // サイドバー・トップページ・各ページのミニナビで共有する、管理者側メニューの構成。
@@ -77,6 +77,21 @@ export const ADMIN_NAV_GROUPS = [
   },
 ]
 
+// マスター専用メニュー。マスターはこれに加えて管理者メニューを閲覧のみで使える
+export const MASTER_NAV_GROUP = {
+  key: 'master',
+  icon: Building2,
+  label: '所管・管理者',
+  dividerAfter: true,
+  items: [
+    { to: '/master/sites', label: '所管一覧' },
+  ],
+}
+
+export function adminGroupsFor(isMaster) {
+  return isMaster ? [MASTER_NAV_GROUP, ...ADMIN_NAV_GROUPS] : ADMIN_NAV_GROUPS
+}
+
 // ユーザー側メニュー（サブメニューを持たないフラットな項目のみ）
 export const USER_NAV_ITEMS = [
   { key: 'scan', icon: ScanLine, to: '/', end: true, label: 'スキャン受付' },
@@ -85,6 +100,14 @@ export const USER_NAV_ITEMS = [
   { key: 'orders', icon: ClipboardCheck, to: '/orders/new', label: '注文' },
   { key: 'settings', icon: Settings, to: '/account-settings', label: '設定' },
 ]
+
+// 代表は、ユーザーのメニューに「メンバー管理」が加わる
+export function userItemsFor(isRepresentative) {
+  if (!isRepresentative) return USER_NAV_ITEMS
+  const items = [...USER_NAV_ITEMS]
+  items.splice(items.length - 1, 0, { key: 'my-members', icon: UserPlus, to: '/my-members', label: 'メンバー管理' })
+  return items
+}
 
 export function pathMatchesItem(pathname, to) {
   if (to === '/') return pathname === '/'

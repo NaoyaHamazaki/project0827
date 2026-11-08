@@ -28,6 +28,8 @@ import TableInfoPage from './pages/TableInfoPage'
 import AnnouncementsPage from './pages/AnnouncementsPage'
 import MemberCreatePage from './pages/MemberCreatePage'
 import RegisterPage from './pages/RegisterPage'
+import MasterSitesPage from './pages/MasterSitesPage'
+import MyMembersPage from './pages/MyMembersPage'
 import { fetchGateStatus } from './api/auth'
 
 export default function App() {
@@ -47,7 +49,8 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<LoginPage portal="member" />} />
+      <Route path="/staff/login" element={<LoginPage portal="staff" />} />
       <Route path="/register/:token" element={<RegisterPage />} />
       <Route
         element={
@@ -193,6 +196,15 @@ export default function App() {
           }
         />
         <Route path="/orders/new" element={<OrderPage />} />
+        <Route
+          path="/master/sites"
+          element={
+            <ProtectedRoute adminOnly>
+              <MasterSitesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/my-members" element={<MyMembersPage />} />
         <Route path="/account-settings" element={<PlaceholderPage title="設定" />} />
       </Route>
     </Routes>

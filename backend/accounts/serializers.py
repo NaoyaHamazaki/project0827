@@ -65,7 +65,18 @@ class AccountTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['display_name'] = user.get_full_name() or user.username
         return token
 
+    # ログイン画面ごとに受け付ける権限（管理者用画面から会員はログインできない、その逆も同様）
+    PORTAL_ROLES = {
+        'staff': {Account.Role.MASTER, Account.Role.ADMIN},
+        'member': {Account.Role.REPRESENTATIVE, Account.Role.USER},
+    }
+
     def validate(self, attrs):
+        portal = self.initial_data.get('portal')
         data = super().validate(attrs)
+        allowed = self.PORTAL_ROLES.get(portal)
+        if allowed is not None and self.user.role not in allowed:
+            # どちらの画面か分からないよう、通常のログイン失敗と同じ文言にする
+            raise serializers.ValidationError('メールアドレスまたはパスワードが正しくありません。')
         data['staff'] = AccountSerializer(self.user).data
         return data

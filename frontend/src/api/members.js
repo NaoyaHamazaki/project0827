@@ -51,8 +51,8 @@ export async function registerMemberByAdmin(payload) {
   return data
 }
 
-export async function createMemberInvite() {
-  const { data } = await client.post('/members/invites/')
+export async function createMemberInvite(payload = {}) {
+  const { data } = await client.post('/members/invites/', payload)
   return data
 }
 
@@ -69,4 +69,18 @@ export async function submitInviteRegistration(token, payload) {
 export async function fetchPublicPlans() {
   const { data } = await client.get('/members/invites/public-plans/')
   return data
+}
+
+export async function fetchMyCompanyMembers() {
+  const { data } = await client.get('/members/my-company/')
+  return data
+}
+
+export async function updateMyCompanyMember(id, payload) {
+  const { data } = await client.patch(`/members/my-company/${id}/`, payload)
+  return data
+}
+
+export async function deleteMyCompanyMember(id) {
+  await client.delete(`/members/my-company/${id}/`)
 }

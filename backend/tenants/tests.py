@@ -54,3 +54,68 @@ class MasterReadOnlyTests(APITestCase):
         self.client.force_authenticate(self.master)
         self.assertEqual(self.client.get('/api/members/').status_code, 200)
         self.assertEqual(self.client.post('/api/members/', {'name': 'x', 'card_identifier': 'z'}).status_code, 403)
+
+
+class ThreeLevelInviteTests(APITestCase):
+    def setUp(self):
+        self.master_site = Site.objects.create(code=Site.MASTER_CODE, name='本社')
+        self.site = Site.objects.create(name='中野')
+        self.master = Account.objects.create_user(
+            username='m', email='m@x.com', password='p', role='master', site=self.master_site,
+        )
+
+    def _issue(self, account, **data):
+        self.client.force_authenticate(account)
+        r = self.client.post('/api/members/invites/', data)
+        self.assertEqual(r.status_code, 201, r.data)
+        self.client.force_authenticate(None)
+        return r.data['token']
+
+    def test_master_admin_representative_user_chain(self):
+        token = self._issue(self.master, site=self.site.id)
+        status = self.client.get(f'/api/members/invites/{token}/').data
+        self.assertEqual((status['target_role'], status['site_name']), ('admin', '中野'))
+        r = self.client.post(f'/api/members/invites/{token}/register/', {
+            'email': 'adm@x.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        admin = Account.objects.get(email='adm@x.com')
+        self.assertEqual((admin.role, admin.site, admin.get_full_name()), ('admin', self.site, '中野_管理者01'))
+
+        token = self._issue(admin)
+        r = self.client.post(f'/api/members/invites/{token}/register/', {
+            'name': '代表太郎', 'company_name': 'E社', 'email': 'rep@x.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        rep = Account.objects.get(email='rep@x.com')
+        self.assertEqual(rep.role, 'representative')
+
+        token = self._issue(rep)
+        self.assertEqual(self.client.get(f'/api/members/invites/{token}/').data['company_name'], 'E社')
+        r = self.client.post(f'/api/members/invites/{token}/register/', {
+            'name': '一般花子', 'email': 'usr@x.com', 'password': 'a-strong-pass-999',
+        })
+        self.assertEqual(r.status_code, 201, r.data)
+        usr = Account.objects.get(email='usr@x.com')
+        self.assertEqual((usr.role, usr.member.company, usr.site), ('user', rep.member.company, self.site))
+
+        # 代表は自分の所属のメンバーを一覧・無効化・削除できる
+        self.client.force_authenticate(rep)
+        names = [m['name'] for m in self.client.get('/api/members/my-company/').data['members']]
+        self.assertEqual(names, ['代表太郎', '一般花子'])
+        r = self.client.patch(f'/api/members/my-company/{usr.member.id}/', {'status': 'inactive'})
+        self.assertEqual(r.status_code, 200)
+        usr.refresh_from_db()
+        self.assertFalse(usr.is_active)
+        self.assertEqual(self.client.delete(f'/api/members/my-company/{rep.member.id}/').status_code, 404)
+
+    def test_regular_user_cannot_issue_invite(self):
+        account = Account.objects.create_user(username='u', email='u@x.com', password='p', role='user')
+        self.client.force_authenticate(account)
+        self.assertEqual(self.client.post('/api/members/invites/').status_code, 403)
+
+    def test_login_portal_rejects_wrong_role(self):
+        Account.objects.create_user(username='a', email='a@x.com', password='pw-12345678', role='admin', site=self.site)
+        ok = self.client.post('/api/auth/login/', {'email': 'a@x.com', 'password': 'pw-12345678', 'portal': 'staff'})
+        ng = self.client.post('/api/auth/login/', {'email': 'a@x.com', 'password': 'pw-12345678', 'portal': 'member'})
+        self.assertEqual((ok.status_code, ng.status_code), (200, 400))

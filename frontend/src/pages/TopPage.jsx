@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ADMIN_NAV_GROUPS, USER_NAV_ITEMS } from '../navConfig'
+import { adminGroupsFor, userItemsFor } from '../navConfig'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import './TopPage.css'
@@ -9,15 +9,15 @@ import './TopPage.css'
 // 管理者・ユーザーの両方で表示する
 export default function TopPage() {
   const { t } = useLanguage()
-  const { isAdmin } = useAuth()
+  const { isAdmin, isMaster, isRepresentative } = useAuth()
   const navigate = useNavigate()
 
   const items = isAdmin
-    ? ADMIN_NAV_GROUPS.map((group) => ({
+    ? adminGroupsFor(isMaster).map((group) => ({
       key: group.key, icon: group.icon, label: group.label, to: group.items[0].to,
       dividerAfter: group.dividerAfter,
     }))
-    : USER_NAV_ITEMS.map((item) => ({ key: item.key, icon: item.icon, label: item.label, to: item.to }))
+    : userItemsFor(isRepresentative).map((item) => ({ key: item.key, icon: item.icon, label: item.label, to: item.to }))
 
   return (
     <div className="top-page">
