@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Plus, Search, Pencil, Trash2, BarChart2, Wand2 } from 'lucide-react'
 import DataTable from '../components/DataTable'
+import MemberTree from '../components/MemberTree'
 import Modal from '../components/Modal'
 import StatusBadge from '../components/StatusBadge'
 import { useLanguage } from '../context/LanguageContext'
@@ -119,6 +120,7 @@ export default function MembersPage() {
   const [members, setMembers] = useState([])
   const [plans, setPlans] = useState([])
   const [query, setQuery] = useState('')
+  const [viewMode, setViewMode] = useState('list')
   const [isLoading, setIsLoading] = useState(true)
   const [editingMember, setEditingMember] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -277,17 +279,30 @@ export default function MembersPage() {
         </button>
       </div>
 
-      <div className="members-page__search">
-        <Search size={16} />
-        <input
-          type="text"
-          placeholder={t('氏名・企業名で検索')}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+      <div className="members-page__view-toggle" role="group">
+        <button type="button" className={viewMode === 'list' ? 'is-active' : ''} onClick={() => setViewMode('list')}>
+          {t('一覧')}
+        </button>
+        <button type="button" className={viewMode === 'tree' ? 'is-active' : ''} onClick={() => setViewMode('tree')}>
+          {t('ツリー')}
+        </button>
       </div>
 
-      {isLoading ? (
+      {viewMode === 'list' && (
+        <div className="members-page__search">
+          <Search size={16} />
+          <input
+            type="text"
+            placeholder={t('氏名・企業名で検索')}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+      )}
+
+      {viewMode === 'tree' ? (
+        <MemberTree />
+      ) : isLoading ? (
         <p className="members-page__loading">{t('読み込み中…')}</p>
       ) : (
         <DataTable

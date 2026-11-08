@@ -84,3 +84,8 @@ export async function updateMyCompanyMember(id, payload) {
 export async function deleteMyCompanyMember(id) {
   await client.delete(`/members/my-company/${id}/`)
 }
+
+export async function fetchMemberTree() {
+  const { data } = await client.get('/members/tree/')
+  return data
+}

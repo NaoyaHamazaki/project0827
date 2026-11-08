@@ -26,7 +26,11 @@ class MemberViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # 自分の配下だけを表示する：管理者は自分の所管、マスターは全所管
+        queryset = super().get_queryset().select_related('site', 'company', 'plan')
+        user = self.request.user
+        if user.role == Account.Role.ADMIN and user.site_id:
+            queryset = queryset.filter(site_id=user.site_id)
         query = self.request.query_params.get('q')
         if query:
             queryset = queryset.filter(
@@ -212,3 +216,62 @@ def _representative_company(user):
     if user.role == Account.Role.REPRESENTATIVE and user.member and user.member.company_id:
         return user.member.company
     return None
+
+
+def _node(role, name, code='', status='active', subtitle=''):
+    return {'role': role, 'name': name, 'code': code, 'status': status, 'subtitle': subtitle, 'children': []}
+
+
+def _member_node(member):
+    role = 'representative' if member.is_representative else 'user'
+    return _node(role, member.name, member.member_code, member.status, member.company_name)
+
+
+class MemberTreeView(APIView):
+    """会員管理＞ツリー表示：ログイン中のアカウントの配下を階層で返す。
+    マスター → 管理者 → 代表 → ユーザー。代表の所属先の管理者は、その代表の招待URLを
+    発行した管理者で判定し、不明な場合（初期データ等）は所管内で管理番号が最も若い管理者とする
+    """
+
+    permission_classes = (IsAdmin,)
+
+    def get(self, request):
+        user = request.user
+        if user.role == Account.Role.MASTER:
+            admins = Account.objects.filter(role=Account.Role.ADMIN).select_related('site').order_by('site__code', 'admin_number')
+            root = _node('master', user.get_full_name() or 'マスター', user.site.code if user.site_id else '')
+        else:
+            admins = Account.objects.filter(pk=user.pk).select_related('site')
+            root = None
+
+        issuer_by_member = dict(
+            MemberInvite.objects.filter(created_member__isnull=False, created_by__role=Account.Role.ADMIN)
+            .values_list('created_member_id', 'created_by_id')
+        )
+        first_admin_by_site = {}
+        for admin in Account.objects.filter(role=Account.Role.ADMIN).order_by('admin_number'):
+            first_admin_by_site.setdefault(admin.site_id, admin.id)
+
+        admin_nodes = []
+        for admin in admins:
+            node = _node('admin', admin.get_full_name() or admin.username,
+                         f'{admin.site.code}-{admin.admin_number:02d}' if admin.site_id and admin.admin_number else '',
+                         'active' if admin.is_active else 'inactive', admin.site.name if admin.site_id else '')
+            members = Member.objects.filter(site_id=admin.site_id).select_related('company').order_by('member_code')
+            for member in members:
+                owner = issuer_by_member.get(member.id) or first_admin_by_site.get(member.site_id)
+                if member.is_representative or member.company_id is None:
+                    if owner != admin.id:
+                        continue
+                    child = _member_node(member)
+                    if member.is_representative:
+                        for sub in members:
+                            if sub.company_id == member.company_id and not sub.is_representative:
+                                child['children'].append(_member_node(sub))
+                    node['children'].append(child)
+            admin_nodes.append(node)
+
+        if root is not None:
+            root['children'] = admin_nodes
+            return Response(root)
+        return Response(admin_nodes[0] if admin_nodes else _node('admin', user.username))

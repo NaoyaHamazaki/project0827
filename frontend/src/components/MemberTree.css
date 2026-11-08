@@ -1,0 +1,91 @@
+.member-tree {
+  overflow-x: auto;
+  padding: var(--space-4) var(--space-2) var(--space-6);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.member-tree__status {
+  color: var(--color-text-muted);
+}
+
+.member-tree ul {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 24px 0 0;
+  list-style: none;
+  position: relative;
+}
+
+.member-tree__root {
+  width: max-content;
+  min-width: 100%;
+  padding-top: 0 !important;
+}
+
+.member-tree li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 8px 0;
+}
+
+/* 兄弟をつなぐ横線と、親から下りる縦線 */
+.member-tree li::before,
+.member-tree li::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 24px;
+  border-top: 2px solid var(--color-border, #c9d2e3);
+}
+
+.member-tree li::before { right: 50%; }
+.member-tree li::after { left: 50%; border-left: 2px solid var(--color-border, #c9d2e3); }
+.member-tree li:only-child::before,
+.member-tree li:only-child::after { border-top: none; }
+.member-tree li:first-child::before,
+.member-tree li:last-child::after { border-top: none; }
+.member-tree li:last-child::before { border-right: 2px solid var(--color-border, #c9d2e3); border-radius: 0 6px 0 0; }
+.member-tree li:first-child::after { border-radius: 6px 0 0 0; }
+.member-tree__root > li { padding-top: 0; }
+.member-tree__root > li::before,
+.member-tree__root > li::after { display: none; }
+
+/* 子リストの上に親から下りる縦線 */
+.member-tree ul ul::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 24px;
+  border-left: 2px solid var(--color-border, #c9d2e3);
+}
+
+.member-tree__node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 130px;
+  max-width: 180px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md, 10px);
+  text-align: center;
+  font-size: 12px;
+}
+
+.member-tree__node.is-master { background-color: #1f3a68; color: #fff; }
+.member-tree__node.is-admin { background-color: #6fa8dc; color: #fff; }
+.member-tree__node.is-representative { background-color: #3d6fc4; color: #fff; }
+.member-tree__node.is-user { background-color: #e6eefb; color: #1f3a68; }
+.member-tree__node.is-inactive { opacity: 0.5; }
+
+.member-tree__role { font-size: 11px; font-weight: 700; opacity: 0.85; }
+.member-tree__name { font-size: 14px; font-weight: 800; }
+.member-tree__meta { font-size: 11px; opacity: 0.85; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.member-tree__off { margin-top: 2px; padding: 0 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.2); font-size: 10px; }
