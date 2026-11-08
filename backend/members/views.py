@@ -224,7 +224,9 @@ def _node(role, name, code='', status='active', subtitle=''):
 
 def _member_node(member):
     role = 'representative' if member.is_representative else 'user'
-    return _node(role, member.name, member.member_code, member.status, member.company_name)
+    # ユーザーの所属名は親の代表と同じなので代表にだけ表示する
+    return _node(role, member.name, member.member_code, member.status,
+                 member.company_name if member.is_representative else '')
 
 
 class MemberTreeView(APIView):

@@ -15,6 +15,12 @@ DEMO_COMPANIES = [
     ('ExpertOffice合同会社', '佐藤 花子', '0002', Member.Status.ACTIVE),
     ('フリーランス', '鈴木 次郎', '0003', Member.Status.INACTIVE),
 ]
+DEMO_USERS = [
+    # (所属名, 氏名, カードID, ステータス, ログイン用メール or None) ※代表ではない一般ユーザー
+    ('株式会社サンプル', '田中 美咲', '0011', Member.Status.ACTIVE, 'user@example.com'),
+    ('株式会社サンプル', '伊藤 健', '0012', Member.Status.INACTIVE, None),
+    ('ExpertOffice合同会社', '渡辺 翔', '0013', Member.Status.ACTIVE, None),
+]
 DEMO_ROOMS = ['第1会議室', '第2会議室', '大会議室', '応接室A', '応接室B']
 DEMO_MENU = ['お茶（Hot）', 'お茶（Ice）', 'コーヒー（Hot）', 'コーヒー（Ice）', '水']
 
@@ -46,6 +52,21 @@ class Command(BaseCommand):
         self._account('operator@example.com', 'operatorpass123', 'operator', Account.Role.REPRESENTATIVE, site,
                       first_name='山田', last_name='太郎', member=yamada)
 
+        for company_name, member_name, card_id, status, email in DEMO_USERS:
+            member = self._member(site, company_name, member_name, card_id, status, representative=False)
+            if email:
+                last, first = member_name.split(' ')
+                self._account(email, 'userpass123', email.split('@')[0], Account.Role.USER, site,
+                              first_name=last, last_name=first, member=member)
+
+        # 2つ目の所管（新宿）：管理者・代表・ユーザーを1名ずつ
+        shinjuku = Site.objects.filter(name='新宿').first() or Site.objects.create(name='新宿')
+        self._account('admin2@example.com', 'adminpass123', 'admin2', Account.Role.ADMIN, shinjuku)
+        rep2 = self._member(shinjuku, '新宿商事株式会社', '高橋 一郎', '0004', Member.Status.ACTIVE, representative=True)
+        self._account('rep2@example.com', 'reppass123', 'rep2', Account.Role.REPRESENTATIVE, shinjuku,
+                      first_name='高橋', last_name='一郎', member=rep2)
+        self._member(shinjuku, '新宿商事株式会社', '小林 優', '0014', Member.Status.ACTIVE, representative=False)
+
         for i, name in enumerate(DEMO_ROOMS):
             MeetingRoom.objects.get_or_create(name=name, defaults={'order': i})
         for i, name in enumerate(DEMO_MENU):
@@ -55,6 +76,16 @@ class Command(BaseCommand):
             self._seed_requests(admin, Account.objects.get(email='operator@example.com'))
 
         self.stdout.write(self.style.SUCCESS('デモデータ投入が完了しました'))
+
+    def _member(self, site, company_name, name, card_id, status, representative):
+        member, created = Member.objects.get_or_create(
+            card_identifier=card_id,
+            defaults={'name': name, 'site': site, 'company': Company.resolve(site, company_name),
+                      'is_representative': representative, 'status': status},
+        )
+        if created:
+            self.stdout.write(self.style.SUCCESS(f'会員を作成しました: {member.member_code} {member.name}'))
+        return member
 
     def _account(self, email, password, username, role, site, superuser=False, **extra):
         account = Account.objects.filter(email=email).first()

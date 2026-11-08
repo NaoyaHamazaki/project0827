@@ -8,10 +8,13 @@ import './LoginPage.css'
 const QUICK_LOGIN_ACCOUNTS = {
   staff: [
     { label: 'マスター', email: 'master@example.com', password: 'masterpass123' },
-    { label: '管理者', email: 'admin@example.com', password: 'adminpass123' },
+    { label: '管理者（中野）', email: 'admin@example.com', password: 'adminpass123' },
+    { label: '管理者（新宿）', email: 'admin2@example.com', password: 'adminpass123' },
   ],
   member: [
-    { label: 'ユーザー（代表）', email: 'operator@example.com', password: 'operatorpass123' },
+    { label: '代表（中野）', email: 'operator@example.com', password: 'operatorpass123' },
+    { label: '代表（新宿）', email: 'rep2@example.com', password: 'reppass123' },
+    { label: 'ユーザー', email: 'user@example.com', password: 'userpass123' },
   ],
 }
 

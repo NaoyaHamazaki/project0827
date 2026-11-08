@@ -16,7 +16,7 @@ function TreeNode({ node }) {
         <span className="member-tree__role">{ROLE_LABELS[node.role]}</span>
         <span className="member-tree__name">{node.name}</span>
         {(node.code || node.subtitle) && (
-          <span className="member-tree__meta">
+          <span className="member-tree__meta" title={[node.code, node.subtitle].filter(Boolean).join(" · ")}>
             {node.code}{node.code && node.subtitle ? ' · ' : ''}{node.subtitle}
           </span>
         )}
