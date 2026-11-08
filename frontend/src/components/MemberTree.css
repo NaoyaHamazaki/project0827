@@ -10,66 +10,74 @@
   color: var(--color-text-muted);
 }
 
+/* 横向きツリー：左の列ほど上位（Lv1 マスター → Lv4 ユーザー）。
+   ボックスの高さを固定し、線はすべてボックスの縦中心（--mid）を基準に引くのでずれない */
+.member-tree {
+  --box-h: 92px;
+  --gap-y: 6px;
+  --stub: 16px;
+  --mid: calc(var(--gap-y) + var(--box-h) / 2 - 1px);
+  --line: var(--color-border, #c9d2e3);
+}
+
 .member-tree ul {
-  display: flex;
-  justify-content: center;
-  margin: 0;
-  padding: 24px 0 0;
-  list-style: none;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 0 calc(var(--stub) * 2);
+  list-style: none;
 }
 
 .member-tree__root {
   width: max-content;
-  min-width: 100%;
-  padding-top: 0 !important;
+  padding-left: 0 !important;
 }
 
 .member-tree li {
   position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 8px 0;
-  --line: var(--color-border, #c9d2e3);
+  align-items: flex-start;
+  padding: var(--gap-y) 0;
 }
 
-/* 線はすべて「幅2pxの帯を各ボックスの中心に置く」方式で描く。
-   ボーダーの左右どちらに付くかで1pxずれる、といったことが起きない */
-.member-tree li::before {            /* 兄弟をつなぐ横線 */
+/* 子の左側を縦につなぐ線 */
+.member-tree li::before {
   content: '';
   position: absolute;
+  left: calc(var(--stub) * -1);
   top: 0;
-  left: 0;
-  right: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+.member-tree li:first-child::before { top: var(--mid); }
+.member-tree li:last-child::before { bottom: auto; height: calc(var(--mid) + 2px); }
+.member-tree li:only-child::before { display: none; }
+
+/* 縦線から各ボックスへの横線 */
+.member-tree li::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--stub) * -1);
+  top: var(--mid);
+  width: var(--stub);
   height: 2px;
   background: var(--line);
 }
-.member-tree li:first-child::before { left: calc(50% - 1px); }
-.member-tree li:last-child::before { right: calc(50% - 1px); }
-.member-tree li:only-child::before { display: none; }
 
-.member-tree li::after {             /* 横線から各ボックスへ下りる縦線 */
+/* 親ボックスの右端から出る横線 */
+.member-tree ul ul::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: calc(50% - 1px);
-  width: 2px;
-  height: 24px;
+  left: 0;
+  top: var(--mid);
+  width: var(--stub);
+  height: 2px;
   background: var(--line);
 }
+.member-tree ul ul { margin-top: calc(var(--gap-y) * -1); }
 
-.member-tree ul ul::before {         /* 親ボックスから横線へ下りる縦線 */
-  content: '';
-  position: absolute;
-  top: 0;
-  left: calc(50% - 1px);
-  width: 2px;
-  height: 24px;
-  background: var(--line);
-}
-
-.member-tree__root > li { padding-top: 0; }
 .member-tree__root > li::before,
 .member-tree__root > li::after { display: none; }
 
@@ -80,7 +88,9 @@
   gap: 2px;
   box-sizing: border-box;
   width: 176px;          /* 幅を固定して中心位置を揃える */
-  min-height: 78px;
+  height: var(--box-h);
+  justify-content: center;
+  flex-shrink: 0;
   padding: 10px 14px;
   border-radius: var(--radius-md, 10px);
   text-align: center;
