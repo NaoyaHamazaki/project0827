@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Staff
+from .models import Account
 
 
-@admin.register(Staff)
+@admin.register(Account)
 class StaffAdmin(UserAdmin):
-    model = Staff
+    model = Account
     list_display = ('email', 'username', 'first_name', 'last_name', 'role', 'member', 'language', 'is_active')
     list_filter = ('role', 'language', 'is_active')
     ordering = ('email',)

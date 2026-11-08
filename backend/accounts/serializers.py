@@ -4,21 +4,21 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from members.models import Member
 
-from .models import Staff
+from .models import Account
 
 
-class StaffMemberSerializer(serializers.ModelSerializer):
+class AccountMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
         fields = ('id', 'name', 'card_identifier')
 
 
-class StaffSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
     display_name = serializers.SerializerMethodField()
-    member = StaffMemberSerializer(read_only=True)
+    member = AccountMemberSerializer(read_only=True)
 
     class Meta:
-        model = Staff
+        model = Account
         fields = ('id', 'email', 'display_name', 'role', 'member', 'language')
 
     def get_display_name(self, obj):
@@ -26,7 +26,7 @@ class StaffSerializer(serializers.ModelSerializer):
 
 
 class UpdateLanguageSerializer(serializers.Serializer):
-    language = serializers.ChoiceField(choices=Staff.Language.choices)
+    language = serializers.ChoiceField(choices=Account.Language.choices)
 
 
 class UpdateSelfAccountSerializer(serializers.Serializer):
@@ -38,7 +38,7 @@ class UpdateSelfAccountSerializer(serializers.Serializer):
     password = serializers.CharField(required=False, write_only=True, min_length=1)
 
     def validate_email(self, value):
-        if Staff.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
+        if Account.objects.exclude(pk=self.instance.pk).filter(email=value).exists():
             raise serializers.ValidationError('このメールアドレスは既に使用されています')
         return value
 
@@ -57,7 +57,7 @@ class UpdateSelfAccountSerializer(serializers.Serializer):
         return user
 
 
-class StaffTokenObtainPairSerializer(TokenObtainPairSerializer):
+class AccountTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -67,5 +67,5 @@ class StaffTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['staff'] = StaffSerializer(self.user).data
+        data['staff'] = AccountSerializer(self.user).data
         return data

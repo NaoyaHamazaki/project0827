@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from accounts.models import Staff
+from accounts.models import Account
 
 from .models import Message, Reaction
 
@@ -14,7 +14,7 @@ class ChatUserSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
 
     class Meta:
-        model = Staff
+        model = Account
         fields = ('id', 'display_name', 'email', 'company')
 
     def get_display_name(self, obj):

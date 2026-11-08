@@ -7,5 +7,5 @@ from .models import AccessLog
 class AccessLogAdmin(admin.ModelAdmin):
     list_display = ('member', 'type', 'scanned_by', 'created_at')
     list_filter = ('type',)
-    search_fields = ('member__name', 'member__company_name')
+    search_fields = ('member__name', 'member__company__name')
     date_hierarchy = 'created_at'

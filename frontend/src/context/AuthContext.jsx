@@ -43,7 +43,9 @@ export function AuthProvider({ children }) {
       staff,
       isLoading,
       isAuthenticated: Boolean(staff),
-      isAdmin: staff?.role === 'admin',
+      // マスターは管理者画面を閲覧のみ可能（変更系はサーバー側で拒否される）
+      isAdmin: staff?.role === 'admin' || staff?.role === 'master',
+      isMaster: staff?.role === 'master',
       login,
       logout,
       refreshStaff,

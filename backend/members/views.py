@@ -11,7 +11,7 @@ from accounts.permissions import IsAdmin
 
 from .models import Member, MemberInvite, Plan
 from .serializers import (
-    AdminMemberRegisterSerializer, InviteStatusSerializer, MemberInviteSerializer, MemberSerializer,
+    AdminMemberRegisterSerializer, InviteStatusSerializer, acting_site, MemberInviteSerializer, MemberSerializer,
     MemberUsageSerializer, PlanSerializer, SelfRegisterSerializer,
 )
 from .usage import calculate_usage
@@ -28,7 +28,7 @@ class MemberViewSet(viewsets.ModelViewSet):
         query = self.request.query_params.get('q')
         if query:
             queryset = queryset.filter(
-                Q(name__icontains=query) | Q(company_name__icontains=query)
+                Q(name__icontains=query) | Q(company__name__icontains=query) | Q(member_code__icontains=query)
             )
         return queryset
 
@@ -69,7 +69,7 @@ class AdminMemberRegisterView(APIView):
     def post(self, request):
         serializer = AdminMemberRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        member = serializer.save()
+        member = serializer.save(site=acting_site(request.user))
         return Response(MemberSerializer(member).data, status=201)
 
 
@@ -108,7 +108,7 @@ class InviteRegisterView(APIView):
 
         serializer = SelfRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        member = serializer.save()
+        member = serializer.save(site=acting_site(invite.created_by))
 
         invite.used_at = timezone.now()
         invite.created_member = member

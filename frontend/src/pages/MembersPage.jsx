@@ -227,6 +227,7 @@ export default function MembersPage() {
   const columns = useMemo(
     () => [
       { key: 'name', header: t('氏名') },
+      { key: 'member_code', header: t('メンバーコード'), render: (row) => row.member_code },
       { key: 'company_name', header: t('所属企業'), render: (row) => row.company_name || '—' },
       { key: 'card_identifier', header: t('カードID') },
       {

@@ -8,6 +8,13 @@ import { ADMIN_NAV_GROUPS, USER_NAV_ITEMS, findActiveGroup } from '../navConfig'
 import MiniNav from './MiniNav'
 import './Layout.css'
 
+const ROLE_LABELS = {
+  master: 'マスター',
+  admin: '管理者',
+  representative: 'ユーザー（代表）',
+  user: 'ユーザー',
+}
+
 function LanguageToggle() {
   const { language, setLanguage } = useLanguage()
   return (
@@ -148,7 +155,7 @@ export default function Layout() {
         <div className={`layout__footer ${isMenuOpen ? 'is-open' : ''}`}>
           <div className="layout__user">
             <span className="layout__user-name">{staff?.display_name}</span>
-            <span className="layout__user-role">{isAdmin ? t('管理者') : t('ユーザー')}</span>
+            <span className="layout__user-role">{t(ROLE_LABELS[staff?.role] || 'ユーザー')}</span>
           </div>
           {LANGUAGE_TOGGLE_ENABLED && <LanguageToggle />}
           <button type="button" className="layout__logout" onClick={logout}>

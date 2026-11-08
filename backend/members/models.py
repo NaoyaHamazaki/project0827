@@ -29,13 +29,24 @@ class Plan(models.Model):
 
 
 class Member(models.Model):
+    """会員情報（代表・ユーザー）。所管・所属に属し、ログインはひも付くAccountで行う"""
+
     class Status(models.TextChoices):
         ACTIVE = 'active', '有効'
         INACTIVE = 'inactive', '無効'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    member_code = models.CharField('メンバーコード', max_length=10, unique=True, blank=True)
     name = models.CharField('会員名', max_length=100)
-    company_name = models.CharField('所属企業・テナント名', max_length=150, blank=True)
+    site = models.ForeignKey(
+        'tenants.Site', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='members', verbose_name='所管',
+    )
+    company = models.ForeignKey(
+        'tenants.Company', on_delete=models.PROTECT, null=True, blank=True,
+        related_name='members', verbose_name='所属',
+    )
+    is_representative = models.BooleanField('代表', default=False)
     card_identifier = models.CharField(
         'カードID', max_length=100, unique=True,
         help_text='バーコード文字列またはICカードのIDm',
@@ -50,9 +61,29 @@ class Member(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            # 代表は1つの所属につき1名
+            models.UniqueConstraint(
+                fields=('company',), condition=models.Q(is_representative=True),
+                name='uniq_representative_per_company',
+            ),
+        ]
 
     def __str__(self):
-        return f'{self.name}（{self.company_name}）'
+        return f'{self.member_code} {self.name}（{self.company_name}）'
+
+    def save(self, *args, **kwargs):
+        from tenants.models import next_code
+
+        if not self.member_code:
+            self.member_code = next_code(Member, 'M', 5, field='member_code')
+        if self.company_id and not self.site_id:
+            self.site_id = self.company.site_id
+        super().save(*args, **kwargs)
+
+    @property
+    def company_name(self):
+        return self.company.name if self.company_id else ''
 
 
 def _generate_token():

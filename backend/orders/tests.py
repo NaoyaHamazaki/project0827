@@ -3,7 +3,7 @@ import datetime
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
 from meetingrooms.models import MeetingRoom
 
 from .models import MenuItem, Order, OrderSettings
@@ -11,13 +11,13 @@ from .models import MenuItem, Order, OrderSettings
 
 class OrderTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='admin3', email='admin3@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='user3', email='user3@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
         self.room = MeetingRoom.objects.create(name='会議室A')
         self.tea_hot = MenuItem.objects.create(name='お茶（Hot）', order=0)

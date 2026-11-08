@@ -63,7 +63,7 @@ class Announcement(models.Model):
     title = models.CharField('タイトル', max_length=200)
     body = models.TextField('本文')
     created_by = models.ForeignKey(
-        'accounts.Staff', on_delete=models.SET_NULL, null=True, blank=True,
+        'accounts.Account', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='announcements',
     )
     created_at = models.DateTimeField('掲載日時', auto_now_add=True)

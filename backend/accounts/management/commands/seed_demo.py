@@ -1,63 +1,92 @@
-from django.core.management.base import BaseCommand
+from datetime import timedelta
 
-from accounts.models import Staff
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
+from accounts.models import Account
+from meetingrooms.models import MeetingRoom, Reservation
 from members.models import Member
+from orders.models import MenuItem, Order, OrderLine
+from tenants.models import Company, Site
+
+DEMO_COMPANIES = [
+    # (所属名, 代表の氏名, カードID, ステータス)
+    ('株式会社サンプル', '山田 太郎', '0001', Member.Status.ACTIVE),
+    ('ExpertOffice合同会社', '佐藤 花子', '0002', Member.Status.ACTIVE),
+    ('フリーランス', '鈴木 次郎', '0003', Member.Status.INACTIVE),
+]
+DEMO_ROOMS = ['第1会議室', '第2会議室', '大会議室', '応接室A', '応接室B']
+DEMO_MENU = ['お茶（Hot）', 'お茶（Ice）', 'コーヒー（Hot）', 'コーヒー（Ice）', '水']
 
 
 class Command(BaseCommand):
-    help = '動作確認用の初期スタッフ・会員データを投入する'
+    help = '動作確認用の初期データ（所管・所属・アカウント・会員・会議室・メニュー等）を投入する。何度実行してもよい'
 
     def handle(self, *args, **options):
-        if not Staff.objects.filter(email='admin@example.com').exists():
-            Staff.objects.create_superuser(
-                username='admin', email='admin@example.com',
-                password='adminpass123', first_name='管理者', role=Staff.Role.ADMIN,
-            )
-            self.stdout.write(self.style.SUCCESS('管理者ユーザーを作成しました: admin@example.com / adminpass123'))
-        else:
-            self.stdout.write('管理者ユーザーは既に存在します')
+        master_site, _ = Site.objects.get_or_create(code=Site.MASTER_CODE, defaults={'name': '本社'})
+        site = Site.objects.filter(name='中野').first() or Site.objects.create(name='中野')
 
-        demo_members = [
-            {'name': '山田 太郎', 'company_name': '株式会社サンプル', 'card_identifier': '0001'},
-            {'name': '佐藤 花子', 'company_name': 'ExpertOffice合同会社', 'card_identifier': '0002'},
-            {'name': '鈴木 次郎', 'company_name': 'フリーランス', 'card_identifier': '0003', 'status': Member.Status.INACTIVE},
-        ]
-        for data in demo_members:
+        self._account('master@example.com', 'masterpass123', 'master', Account.Role.MASTER, master_site,
+                      first_name='マスター')
+        admin = self._account('admin@example.com', 'adminpass123', 'admin', Account.Role.ADMIN, site,
+                              superuser=True)
+
+        for company_name, member_name, card_id, status in DEMO_COMPANIES:
+            company = Company.resolve(site, company_name)
             member, created = Member.objects.get_or_create(
-                card_identifier=data['card_identifier'], defaults=data
+                card_identifier=card_id,
+                defaults={'name': member_name, 'site': site, 'company': company,
+                          'is_representative': True, 'status': status},
             )
             if created:
-                self.stdout.write(self.style.SUCCESS(f'会員を作成しました: {member.name}'))
+                self.stdout.write(self.style.SUCCESS(f'会員を作成しました: {member.member_code} {member.name}'))
 
-        # ユーザーロールのデモアカウントは、自分のQR/カードIDを表示できるよう
-        # デモ会員（山田太郎, card_identifier='0001'）に紐付ける。
-        # 「ユーザー」ロール＝会員本人のログインであることが分かるよう、
-        # 氏名もその会員と同じ名前にしておく（旧名「受付」だと管理者/受付担当の
-        # アカウントに見えて紛らわしいため）。
-        demo_member = Member.objects.get(card_identifier='0001')
+        # 会員ログインのデモは「株式会社サンプル」の代表・山田太郎
+        yamada = Member.objects.get(card_identifier='0001')
+        self._account('operator@example.com', 'operatorpass123', 'operator', Account.Role.REPRESENTATIVE, site,
+                      first_name='山田', last_name='太郎', member=yamada)
 
-        user_staff, staff_created = Staff.objects.get_or_create(
-            email='operator@example.com',
-            defaults={
-                'username': 'operator', 'first_name': '山田', 'last_name': '太郎',
-                'role': Staff.Role.USER, 'member': demo_member,
-            },
-        )
-        if staff_created:
-            user_staff.set_password('operatorpass123')
-            user_staff.save()
-            self.stdout.write(self.style.SUCCESS('ユーザーアカウントを作成しました: operator@example.com / operatorpass123'))
-        else:
-            update_fields = []
-            if user_staff.member_id is None:
-                user_staff.member = demo_member
-                update_fields.append('member')
-            if user_staff.first_name == '受付':
-                user_staff.first_name = '山田'
-                user_staff.last_name = '太郎'
-                update_fields += ['first_name', 'last_name']
-            if update_fields:
-                user_staff.save(update_fields=update_fields)
-            self.stdout.write('ユーザーアカウントは既に存在します')
+        for i, name in enumerate(DEMO_ROOMS):
+            MeetingRoom.objects.get_or_create(name=name, defaults={'order': i})
+        for i, name in enumerate(DEMO_MENU):
+            MenuItem.objects.get_or_create(name=name, defaults={'order': i})
+
+        if not Reservation.objects.exists():
+            self._seed_requests(admin, Account.objects.get(email='operator@example.com'))
 
         self.stdout.write(self.style.SUCCESS('デモデータ投入が完了しました'))
+
+    def _account(self, email, password, username, role, site, superuser=False, **extra):
+        account = Account.objects.filter(email=email).first()
+        if account:
+            self.stdout.write(f'アカウントは既に存在します: {email}')
+            return account
+        create = Account.objects.create_superuser if superuser else Account.objects.create_user
+        account = create(username=username, email=email, password=password, role=role, site=site, **extra)
+        self.stdout.write(self.style.SUCCESS(f'アカウントを作成しました: {email}（{account.get_role_display()}）'))
+        return account
+
+    def _seed_requests(self, admin, user):
+        rooms = list(MeetingRoom.objects.order_by('order', 'id'))
+        menu = list(MenuItem.objects.order_by('order', 'id'))
+        base = timezone.localtime().replace(minute=0, second=0, microsecond=0)
+        for room, day, start, end, note, who, status in [
+            (rooms[0], 1, 10, 11, '定例ミーティング', user, Reservation.Status.CONFIRMED),
+            (rooms[2], 1, 14, 16, '全体会議', admin, Reservation.Status.CONFIRMED),
+            (rooms[3], 2, 13, 14, '来客対応', user, Reservation.Status.CONFIRMED),
+            (rooms[1], 3, 9, 10, '面接', user, Reservation.Status.CANCELLED),
+            (rooms[4], 5, 15, 17, '', admin, Reservation.Status.CONFIRMED),
+        ]:
+            d = base + timedelta(days=day)
+            Reservation.objects.create(room=room, note=note, requested_by=who, status=status,
+                                       start_at=d.replace(hour=start), end_at=d.replace(hour=end))
+        for room, who, status, lines in [
+            (rooms[0], user, Order.Status.RECEIVED, [(0, 2), (2, 1)]),
+            (rooms[3], user, Order.Status.RECEIVED, [(1, 3)]),
+            (rooms[2], admin, Order.Status.DONE, [(0, 4), (4, 4)]),
+            (rooms[1], user, Order.Status.CANCELLED, [(3, 1)]),
+        ]:
+            order = Order.objects.create(room=room, requested_by=who, status=status)
+            for index, qty in lines:
+                OrderLine.objects.create(order=order, menu_item=menu[index], quantity=qty)
+        self.stdout.write(self.style.SUCCESS('会議室予約・注文のデモデータを作成しました'))

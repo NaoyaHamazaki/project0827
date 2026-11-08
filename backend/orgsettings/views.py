@@ -16,7 +16,7 @@ from .serializers import AnnouncementSerializer, OrgSettingsSerializer, WebhookS
 # テーブル確認（開発用）で表示対象とする自アプリの一覧。
 # Django組み込みのauth/admin/sessions等は対象外にする。
 DEBUG_TABLE_APP_LABELS = [
-    'accounts', 'members', 'access', 'cards', 'orgsettings', 'chat', 'meetingrooms', 'orders',
+    'tenants', 'accounts', 'members', 'access', 'cards', 'orgsettings', 'chat', 'meetingrooms', 'orders',
 ]
 # 画面にそのまま出すべきでない値を持つ列（パスワードハッシュ・Webhookシークレット等）
 DEBUG_TABLE_MASKED_FIELDS = {'password', 'secret'}
@@ -24,8 +24,10 @@ DEBUG_TABLE_ROW_LIMIT = 200
 
 # 各テーブルが何のためのものかを一覧画面に表示するための説明文
 DEBUG_TABLE_DESCRIPTIONS = {
-    'accounts.Staff': 'ログインアカウント（管理者／ユーザー）。会員との紐づけや権限を保持します',
-    'members.Member': '受付・入退室の対象となる会員の基本情報（氏名・所属企業・カードID等）',
+    'tenants.Site': '所管（支店）。コードは S＋3桁、マスター用は S000',
+    'tenants.Company': '所属（契約企業）。コードは C＋4桁。代表1名とユーザーで構成',
+    'accounts.Account': 'ログインアカウント（マスター／管理者／代表／ユーザー）。所管・管理番号・会員情報とのひも付けを保持',
+    'members.Member': '会員情報（代表・ユーザー）。メンバーコード（M＋5桁）・所管・所属・カードID等',
     'members.Plan': '会員に割り当てる月間利用時間の上限プラン',
     'access.AccessLog': '入退室（チェックイン・チェックアウト）の打刻ログ',
     'cards.SecurityCard': '貸出用セキュリティカードの台帳',

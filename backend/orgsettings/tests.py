@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
 
 from .dispatch import dispatch_webhooks
 from .models import OrgSettings, Webhook
@@ -12,13 +12,13 @@ from .models import OrgSettings, Webhook
 
 class OrgSettingsViewTests(APITestCase):
     def setUp(self):
-        self.operator = Staff.objects.create_user(
+        self.operator = Account.objects.create_user(
             username='op', email='op@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
 
     def test_get_requires_admin(self):
@@ -46,9 +46,9 @@ class OrgSettingsViewTests(APITestCase):
 
 class WebhookViewSetTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
         self.client.force_authenticate(self.admin)
 
@@ -112,13 +112,13 @@ class DispatchWebhooksTests(APITestCase):
 
 class AnnouncementTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='ann-admin', email='ann-admin@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='ann-user', email='ann-user@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
 
     def test_admin_can_create_and_list_announcements(self):

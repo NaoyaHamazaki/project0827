@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import Staff
+from accounts.models import Account
 
 from .models import Conversation, Message, Participant, Reaction
 from .serializers import ChatUserSerializer, MessageSerializer, SendMessageSerializer
@@ -44,14 +44,14 @@ class ChatUserSearchView(APIView):
     def get(self, request):
         q = request.query_params.get('q', '').strip()
         role = request.query_params.get('role', '').strip()
-        qs = Staff.objects.filter(is_active=True).exclude(pk=request.user.pk)
-        if role in Staff.Role.values:
+        qs = Account.objects.filter(is_active=True).exclude(pk=request.user.pk)
+        if role in Account.Role.values:
             qs = qs.filter(role=role)
         if q:
             qs = qs.filter(
                 Q(first_name__icontains=q) | Q(last_name__icontains=q)
                 | Q(username__icontains=q) | Q(email__icontains=q)
-                | Q(member__name__icontains=q) | Q(member__company_name__icontains=q)
+                | Q(member__name__icontains=q) | Q(member__company__name__icontains=q)
             )
         qs = qs.select_related('member').order_by('first_name', 'username')[:20]
         return Response(ChatUserSerializer(qs, many=True).data)
@@ -70,7 +70,7 @@ class ConversationListView(APIView):
     def post(self, request):
         """指定ユーザーとの1対1チャットを取得（無ければ作成）"""
         target = get_object_or_404(
-            Staff.objects.filter(is_active=True), pk=request.data.get('user_id'),
+            Account.objects.filter(is_active=True), pk=request.data.get('user_id'),
         )
         if target.pk == request.user.pk:
             return Response({'detail': '自分自身とはチャットできません'}, status=400)

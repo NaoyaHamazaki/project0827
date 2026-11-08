@@ -6,7 +6,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
+from tenants.testing import make_company
 from members.models import Member, Plan
 
 from .models import AccessLog
@@ -15,19 +16,19 @@ from .qr_token import generate_qr_token, resolve_qr_token
 
 class ScanFlowTests(APITestCase):
     def setUp(self):
-        self.operator = Staff.objects.create_user(
+        self.operator = Account.objects.create_user(
             username='op', email='op@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
         self.member = Member.objects.create(
-            name='テスト太郎', company_name='テスト株式会社', card_identifier='CARD001'
+            name='テスト太郎', company=make_company('テスト株式会社'), card_identifier='CARD001'
         )
         self.inactive_member = Member.objects.create(
-            name='無効太郎', company_name='テスト株式会社', card_identifier='CARD002',
+            name='無効太郎', company=make_company('テスト株式会社'), card_identifier='CARD002',
             status=Member.Status.INACTIVE,
         )
 
@@ -159,10 +160,10 @@ class ScanFlowTests(APITestCase):
 class QrTokenViewTests(APITestCase):
     def setUp(self):
         self.member = Member.objects.create(
-            name='テスト太郎', company_name='テスト株式会社', card_identifier='CARD001'
+            name='テスト太郎', company=make_company('テスト株式会社'), card_identifier='CARD001'
         )
         self.inactive_member = Member.objects.create(
-            name='無効太郎', company_name='テスト株式会社', card_identifier='CARD002',
+            name='無効太郎', company=make_company('テスト株式会社'), card_identifier='CARD002',
             status=Member.Status.INACTIVE,
         )
 
@@ -190,16 +191,16 @@ class QrTokenViewTests(APITestCase):
 
 class AccessLogAdminManagementTests(APITestCase):
     def setUp(self):
-        self.operator = Staff.objects.create_user(
+        self.operator = Account.objects.create_user(
             username='op', email='op@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
         self.member = Member.objects.create(
-            name='テスト太郎', company_name='テスト株式会社', card_identifier='CARD001'
+            name='テスト太郎', company=make_company('テスト株式会社'), card_identifier='CARD001'
         )
         self.log = AccessLog.objects.create(
             member=self.member, type=AccessLog.LogType.CHECK_IN, scanned_by=self.admin,
@@ -254,7 +255,7 @@ class AccessLogAdminManagementTests(APITestCase):
 
     def test_edit_updates_member_type_and_timestamp(self):
         other_member = Member.objects.create(
-            name='別会員', company_name='別会社', card_identifier='CARD999',
+            name='別会員', company=make_company('別会社'), card_identifier='CARD999',
         )
         custom_time = timezone.now().replace(microsecond=0) - timedelta(hours=3)
         payload = {
@@ -275,15 +276,15 @@ class AccessLogAdminManagementTests(APITestCase):
 class MyQrAndStatusViewTests(APITestCase):
     def setUp(self):
         self.member = Member.objects.create(
-            name='テスト太郎', company_name='テスト株式会社', card_identifier='CARD001'
+            name='テスト太郎', company=make_company('テスト株式会社'), card_identifier='CARD001'
         )
-        self.linked_user = Staff.objects.create_user(
+        self.linked_user = Account.objects.create_user(
             username='linked', email='linked@example.com', password='pass12345',
-            role=Staff.Role.USER, member=self.member,
+            role=Account.Role.USER, member=self.member,
         )
-        self.unlinked_user = Staff.objects.create_user(
+        self.unlinked_user = Account.objects.create_user(
             username='unlinked', email='unlinked@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
 
     def test_my_qr_requires_linked_member(self):

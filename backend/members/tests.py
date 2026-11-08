@@ -6,7 +6,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
+from tenants.testing import make_company
 from access.models import AccessLog
 
 from .models import Member, MemberInvite, Plan
@@ -15,16 +16,16 @@ from .usage import calculate_usage
 
 class MemberApiTests(APITestCase):
     def setUp(self):
-        self.operator = Staff.objects.create_user(
+        self.operator = Account.objects.create_user(
             username='op', email='op@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        Member.objects.create(name='山田太郎', company_name='A社', card_identifier='C1')
-        Member.objects.create(name='佐藤花子', company_name='B社', card_identifier='C2')
+        Member.objects.create(name='山田太郎', company=make_company('A社'), card_identifier='C1')
+        Member.objects.create(name='佐藤花子', company=make_company('B社'), card_identifier='C2')
 
     def test_operator_cannot_list_members(self):
         self.client.force_authenticate(self.operator)
@@ -48,13 +49,13 @@ class MemberApiTests(APITestCase):
 
 class PlanApiTests(APITestCase):
     def setUp(self):
-        self.operator = Staff.objects.create_user(
+        self.operator = Account.objects.create_user(
             username='op', email='op@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
 
     def test_operator_cannot_create_plan(self):
@@ -83,13 +84,13 @@ class PlanApiTests(APITestCase):
 
 class CalculateUsageTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='adm', email='adm@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
         self.plan = Plan.objects.create(name='ライトプラン', monthly_hour_limit=10)
         self.member = Member.objects.create(
-            name='テスト太郎', company_name='テスト社', card_identifier='U1', plan=self.plan,
+            name='テスト太郎', company=make_company('テスト社'), card_identifier='U1', plan=self.plan,
         )
 
     def _log(self, log_type, when):
@@ -134,7 +135,7 @@ class CalculateUsageTests(APITestCase):
 
     def test_member_without_plan_has_no_limit(self):
         member = Member.objects.create(
-            name='上限なし太郎', company_name='テスト社', card_identifier='U2',
+            name='上限なし太郎', company=make_company('テスト社'), card_identifier='U2',
         )
         usage = calculate_usage(member)
         self.assertIsNone(usage['limit_hours'])
@@ -157,13 +158,13 @@ class CalculateUsageTests(APITestCase):
 
 class MemberRegistrationTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='reg-admin', email='reg-admin@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='reg-user', email='reg-user@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
 
     def test_admin_can_register_member_with_login(self):
@@ -174,10 +175,24 @@ class MemberRegistrationTests(APITestCase):
         })
         self.assertEqual(r.status_code, 201, r.data)
         member = Member.objects.get(name='新規太郎')
-        staff = Staff.objects.get(email='new-taro@example.com')
-        self.assertEqual(staff.member, member)
-        self.assertEqual(staff.role, Staff.Role.USER)
-        self.assertTrue(staff.check_password('a-strong-pass-999'))
+        account = Account.objects.get(email='new-taro@example.com')
+        self.assertEqual(account.member, member)
+        self.assertTrue(account.check_password('a-strong-pass-999'))
+        # 新しい所属の最初の会員は代表になる
+        self.assertEqual(account.role, Account.Role.REPRESENTATIVE)
+        self.assertTrue(member.is_representative)
+        self.assertEqual(member.company.name, 'C社')
+        self.assertTrue(member.member_code.startswith('M'))
+
+    def test_second_member_of_same_company_is_regular_user(self):
+        self.client.force_authenticate(self.admin)
+        for name, email in [('代表', 'rep@example.com'), ('一般', 'general@example.com')]:
+            r = self.client.post(reverse('member-admin-register'), {
+                'name': name, 'company_name': 'D社', 'email': email, 'password': 'a-strong-pass-999',
+            })
+            self.assertEqual(r.status_code, 201, r.data)
+        self.assertEqual(Account.objects.get(email='general@example.com').role, Account.Role.USER)
+        self.assertFalse(Member.objects.get(name='一般').is_representative)
 
     def test_non_admin_cannot_register_member(self):
         self.client.force_authenticate(self.user)
@@ -196,13 +211,13 @@ class MemberRegistrationTests(APITestCase):
 
 class MemberInviteTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='inv-admin', email='inv-admin@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='inv-user', email='inv-user@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
 
     def test_non_admin_cannot_create_invite(self):

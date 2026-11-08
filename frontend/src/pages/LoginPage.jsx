@@ -6,8 +6,9 @@ import { LANGUAGE_TOGGLE_ENABLED, useLanguage } from '../context/LanguageContext
 import './LoginPage.css'
 
 const QUICK_LOGIN_ACCOUNTS = [
+  { label: 'マスター', email: 'master@example.com', password: 'masterpass123' },
   { label: '管理者', email: 'admin@example.com', password: 'adminpass123' },
-  { label: 'ユーザー', email: 'operator@example.com', password: 'operatorpass123' },
+  { label: 'ユーザー（代表）', email: 'operator@example.com', password: 'operatorpass123' },
 ]
 
 export default function LoginPage() {

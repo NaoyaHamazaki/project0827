@@ -1,12 +1,12 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from .models import Staff
+from .models import Account
 
 
 class SelfAccountUpdateTests(APITestCase):
     def setUp(self):
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='selfedit', email='selfedit@example.com', password='orig-pass-123',
             first_name='太郎', last_name='山田',
         )
@@ -34,7 +34,7 @@ class SelfAccountUpdateTests(APITestCase):
         self.assertEqual(r.status_code, 400)
 
     def test_duplicate_email_rejected(self):
-        Staff.objects.create_user(username='other', email='taken@example.com', password='pass12345')
+        Account.objects.create_user(username='other', email='taken@example.com', password='pass12345')
         self.client.force_authenticate(self.user)
         r = self.client.patch(reverse('auth-me-account'), {'email': 'taken@example.com'})
         self.assertEqual(r.status_code, 400)

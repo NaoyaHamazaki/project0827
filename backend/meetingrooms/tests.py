@@ -1,20 +1,20 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
 
 from .models import FloorPlanItem, FloorShape, MeetingRoom, Reservation
 
 
 class MeetingRoomTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='admin', email='admin2@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='user', email='user2@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
         self.room = MeetingRoom.objects.create(name='会議室A')
 
@@ -67,7 +67,7 @@ class MeetingRoomTests(APITestCase):
             room=self.room, start_at='2026-12-01T10:00:00Z', end_at='2026-12-01T11:00:00Z',
             requested_by=self.user,
         )
-        other = Staff.objects.create_user(
+        other = Account.objects.create_user(
             username='other', email='other2@example.com', password='pass12345',
         )
         self.client.force_authenticate(other)
@@ -91,13 +91,13 @@ class MeetingRoomTests(APITestCase):
 
 class FloorPlanTests(APITestCase):
     def setUp(self):
-        self.admin = Staff.objects.create_user(
+        self.admin = Account.objects.create_user(
             username='admin4', email='admin4@example.com', password='pass12345',
-            role=Staff.Role.ADMIN,
+            role=Account.Role.ADMIN,
         )
-        self.user = Staff.objects.create_user(
+        self.user = Account.objects.create_user(
             username='user4', email='user4@example.com', password='pass12345',
-            role=Staff.Role.USER,
+            role=Account.Role.USER,
         )
         self.room = MeetingRoom.objects.create(name='会議室A')
         self.shape_payload = {

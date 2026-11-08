@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
+    'tenants',
     'accounts',
     'members',
     'access',
@@ -117,7 +118,7 @@ else:
         }
     }
 
-AUTH_USER_MODEL = 'accounts.Staff'
+AUTH_USER_MODEL = 'accounts.Account'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

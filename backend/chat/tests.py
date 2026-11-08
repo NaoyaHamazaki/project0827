@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from accounts.models import Staff
+from accounts.models import Account
 
 from .models import Message
 
@@ -9,12 +9,12 @@ from .models import Message
 class ChatTests(APITestCase):
     def setUp(self):
         def mk(name, **kwargs):
-            return Staff.objects.create_user(
+            return Account.objects.create_user(
                 username=name, email=f'{name}@example.com', password='pass12345',
                 first_name=name, **kwargs,
             )
         self.a, self.b, self.c = mk('alice'), mk('bob'), mk('carol')
-        self.admin = mk('root', role=Staff.Role.ADMIN)
+        self.admin = mk('root', role=Account.Role.ADMIN)
 
     def open_chat(self, me, other):
         self.client.force_authenticate(me)
