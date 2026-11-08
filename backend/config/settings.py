@@ -106,7 +106,10 @@ if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ['DATABASE_URL'],
-            conn_max_age=600,
+            # 0 = リクエストごとにDB接続を閉じる。Railway の Serverless（無アクセス時スリープ）は
+            # DB接続が開いているだけで「通信あり」とみなして眠らないため。常時起動に戻すときは
+            # Variables に DJANGO_DB_CONN_MAX_AGE=600 を設定する
+            conn_max_age=int(os.environ.get('DJANGO_DB_CONN_MAX_AGE', '0')),
             ssl_require=IS_RAILWAY,
         )
     }

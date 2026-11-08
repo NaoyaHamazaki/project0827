@@ -32,7 +32,10 @@ COPY backend/ ./
 # 一致させるため、/app/frontend/dist に配置する（BASE_DIR = /app/backend）。
 COPY --from=frontend-build /app/frontend/dist /app/frontend/dist
 
+# 静的ファイルの収集はビルド時に1回だけ行う（スリープからの起動を速くするため）。
+RUN python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
-# migrate と collectstatic は起動のたびに実行する（べき等なので毎回実行して問題ない）。
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn config.wsgi --bind 0.0.0.0:${PORT:-8000} --timeout 120 --workers 2"]
+# migrate は railway.json の preDeployCommand で、デプロイ時に1回だけ実行する。
+CMD ["sh", "-c", "gunicorn config.wsgi --bind 0.0.0.0:${PORT:-8000} --worker-class gthread --workers 2 --threads 8 --timeout 120"]

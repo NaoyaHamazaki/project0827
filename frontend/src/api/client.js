@@ -36,6 +36,13 @@ client.interceptors.response.use(
   (response) => response,
   async (error) => {
     const { config, response } = error
+    // Railway の Serverless でスリープ中のサーバーが起動している途中は 502/503 が返ることがある。
+    // 読み取り（GET）だけ1.5秒後に1回再送する（POST等は重複登録を避けるため再送しない）
+    if ([502, 503].includes(response?.status) && config?.method === 'get' && !config._wakeRetry) {
+      config._wakeRetry = true
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      return client(config)
+    }
     if (response?.status !== 401 || config._retry) {
       throw error
     }
