@@ -25,3 +25,15 @@ def spa_index(request, *args, **kwargs):
     # Djangoのテンプレートエンジンは通さない（ビルド済みHTMLをそのまま返すだけでよい）。
     html = index_path.read_text(encoding="utf-8")
     return HttpResponse(html, content_type="text/html; charset=utf-8")
+
+
+def launch_page(request, *args, **kwargs):
+    """LP（frontend/public/launch/index.html → ビルド後 dist/launch/index.html）を返す。
+
+    /launch/ は React アプリではなく、独立した1枚もののHTMLとして配信する。
+    """
+    page_path = settings.FRONTEND_DIST_DIR / "launch" / "index.html"
+    if not page_path.exists():
+        return HttpResponseNotFound(_NOT_BUILT_MESSAGE, content_type="text/plain; charset=utf-8")
+    html = page_path.read_text(encoding="utf-8")
+    return HttpResponse(html, content_type="text/html; charset=utf-8")

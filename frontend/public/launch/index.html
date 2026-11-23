@@ -1,5 +1,10 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
 <title>場をつくる人の受付システム LP</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
@@ -24,7 +29,7 @@
   --accent:#6E9BFF; --accent-ink:#0C1220; --accent-soft:#1A2A4D; --violet:#A98BFF; --tbd-bg:#3A2F0F; --tbd-ink:#F5D57A; --ok:#4ADE80; color-scheme:dark}
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--s0);line-height:1.8;word-break:auto-phrase;line-break:strict;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--s0);line-height:1.8;word-break:auto-phrase;line-break:strict;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--f-display);line-height:1.35;text-wrap:balance;margin:0}
 p{margin:0}
 a{color:var(--accent)}
@@ -237,6 +242,8 @@ footer{border-top:1px solid var(--line);padding-block:24px;font-size:var(--s-1);
 }
 @media (prefers-reduced-motion:reduce){.btn{transition:none}}
 </style>
+</head>
+<body>
 
 <div class="draftbar"><div class="wrap"><b>LPたたき台</b><span>黄色の<span class="tbd">◯</span>は未決定（PoCの条件・公開先など）。画面写真はイメージで、実際のスクリーンショットに差し替える予定。</span></div></div>
 
@@ -563,3 +570,5 @@ document.getElementById('applyForm').addEventListener('submit',function(e){
   msg.style.color='';msg.textContent='たたき台のため、実際には送信されません（送信先は未決定）。';
 });
 </script>
+</body>
+</html>

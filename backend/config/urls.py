@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
 
-from .spa import spa_index
+from .spa import launch_page, spa_index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -14,6 +14,8 @@ urlpatterns = [
     path('api/meeting-rooms/', include('meetingrooms.urls')),
     path('api/orders/', include('orders.urls')),
     path('api/', include('access.urls')),
+    # LP（React アプリとは別の1枚ものHTML）。catch-all より前に置く。
+    re_path(r'^launch/?$', launch_page),
     # 上記以外の全パスはビルド済みフロントエンド（frontend/dist/index.html）を返す。
     # React Router側のルート（/members, /logs など）を直接開いたときのため、
     # 必ず一番最後に置くこと。
