@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Clock } from 'lucide-react'
 import { fetchOrders, updateOrderStatus } from '../api/orders'
 import DataTable from '../components/DataTable'
 import { useLanguage } from '../context/LanguageContext'
@@ -80,16 +81,38 @@ export default function OrderListPage() {
     setOrders((current) => current.map((order) => (order.id === updated.id ? updated : order)))
   }
 
+  const locale = language === 'en' ? 'en-US' : 'ja-JP'
+  const formatRequested = (iso) => new Date(iso).toLocaleString(locale, {
+    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  })
+
+  // スマホ幅では列を組み替える（1列目に会議室名・注文者・注文日時、2列目に注文内容、3列目にステータス）。
+  // PCでは従来どおりの表。並びは OrderListPage.css の grid-template-areas で指定している
   const columns = [
-    { key: 'room_name', header: t('会議室名') },
+    { key: 'room_name', header: t('会議室名'), cellClassName: 'order-list__cell--room' },
     {
       key: 'content',
       header: t('注文内容'),
-      render: (row) => row.lines.map((line) => `${line.menu_item_name} x${line.quantity}`).join('、'),
+      cellClassName: 'order-list__cell--content',
+      render: (row) => (
+        <>
+          {row.lines.map((line) => `${line.menu_item_name} x${line.quantity}`).join('、')}
+          {row.requested_at && (
+            <>
+              <br />
+              <span className="order-list__scheduled">
+                <Clock size={13} strokeWidth={2.2} aria-hidden="true" />
+                {formatRequested(row.requested_at)} {t('指定')}
+              </span>
+            </>
+          )}
+        </>
+      ),
     },
     {
       key: 'requester',
       header: t('注文者'),
+      cellClassName: 'order-list__cell--requester',
       render: (row) => (
         <span>
           {row.requested_by_name || t('不明')}
@@ -100,13 +123,13 @@ export default function OrderListPage() {
     {
       key: 'created_at',
       header: t('注文日時'),
-      render: (row) => new Date(row.created_at).toLocaleString(language === 'en' ? 'en-US' : 'ja-JP', {
-        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
-      }),
+      cellClassName: 'order-list__cell--created',
+      render: (row) => formatRequested(row.created_at),
     },
     {
       key: 'status',
       header: t('ステータス'),
+      cellClassName: 'order-list__cell--status',
       render: (row) => <StatusCell order={row} onChanged={handleChanged} />,
     },
   ]
@@ -121,7 +144,14 @@ export default function OrderListPage() {
       {isLoading ? (
         <p className="settings-page__loading">{t('読み込み中…')}</p>
       ) : (
-        <DataTable columns={columns} rows={orders} rowKey={(row) => row.id} emptyMessage={t('注文はまだありません')} />
+        <DataTable
+          className="order-list__table"
+          columns={columns}
+          rows={orders}
+          rowKey={(row) => row.id}
+          rowClassName={(row) => (row.requested_at ? 'order-list__row--scheduled' : undefined)}
+          emptyMessage={t('注文はまだありません')}
+        />
       )}
     </div>
   )

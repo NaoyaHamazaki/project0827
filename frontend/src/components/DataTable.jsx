@@ -7,13 +7,14 @@ export default function DataTable({
   emptyMessage = 'データがありません',
   mobileCompact = false,
   rowClassName,
+  className = '',
 }) {
   if (rows.length === 0) {
     return <div className="data-table__empty">{emptyMessage}</div>
   }
 
   return (
-    <div className={`data-table__wrapper ${mobileCompact ? 'data-table__wrapper--mobile-compact' : ''}`}>
+    <div className={`data-table__wrapper ${mobileCompact ? 'data-table__wrapper--mobile-compact' : ''} ${className}`}>
       <table className="data-table">
         <thead>
           <tr>
@@ -28,7 +29,7 @@ export default function DataTable({
           {rows.map((row) => (
             <tr key={rowKey(row)} className={rowClassName ? rowClassName(row) : undefined}>
               {columns.map((column) => (
-                <td key={column.key} data-label={column.header}>
+                <td key={column.key} data-label={column.header} className={column.cellClassName}>
                   {column.render ? column.render(row) : row[column.key]}
                 </td>
               ))}

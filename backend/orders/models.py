@@ -44,13 +44,16 @@ class OrderSettings(models.Model):
 
     def is_accepting_now(self):
         """開始・終了のどちらかが未設定なら常時受付可能とする"""
+        return self.is_within_accept_time(timezone.localtime().time())
+
+    def is_within_accept_time(self, value):
+        """指定時刻（time）が受付時間帯に入っているか。未設定なら常にTrue"""
         if not self.accept_start_time or not self.accept_end_time:
             return True
-        now = timezone.localtime().time()
         if self.accept_start_time <= self.accept_end_time:
-            return self.accept_start_time <= now <= self.accept_end_time
+            return self.accept_start_time <= value <= self.accept_end_time
         # 日をまたぐ設定（例: 22:00〜翌6:00）にも一応対応しておく
-        return now >= self.accept_start_time or now <= self.accept_end_time
+        return value >= self.accept_start_time or value <= self.accept_end_time
 
 
 class Order(models.Model):
@@ -68,6 +71,10 @@ class Order(models.Model):
     requested_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='orders',
+    )
+    requested_at = models.DateTimeField(
+        '指定時刻', null=True, blank=True,
+        help_text='時間指定の注文のみ。空欄は「今すぐ」の注文',
     )
     created_at = models.DateTimeField('注文日時', auto_now_add=True)
 

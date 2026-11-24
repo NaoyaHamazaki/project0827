@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from .models import MenuItem, Order, OrderLine, OrderSettings
@@ -45,7 +48,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             'id', 'room', 'room_name', 'status', 'requested_by_name', 'company_name',
-            'lines', 'items', 'created_at',
+            'lines', 'items', 'requested_at', 'created_at',
         )
         read_only_fields = ('id', 'status', 'created_at')
 
@@ -67,6 +70,19 @@ class OrderSerializer(serializers.ModelSerializer):
             if not item['menu_item'].is_available:
                 raise serializers.ValidationError(f"「{item['menu_item'].name}」は現在受付できません")
         return items
+
+    def validate_requested_at(self, value):
+        """時間指定は「今より後」かつ「受付時間帯の範囲内」かつ「24時間以内」に限る"""
+        if value is None:
+            return value
+        now = timezone.now()
+        if value <= now:
+            raise serializers.ValidationError('指定時刻は現在より後の時刻を選んでください')
+        if value - now > timedelta(hours=24):
+            raise serializers.ValidationError('指定時刻は24時間以内で選んでください')
+        if not OrderSettings.load().is_within_accept_time(timezone.localtime(value).time()):
+            raise serializers.ValidationError('指定時刻が受付時間外です')
+        return value
 
     def create(self, validated_data):
         items = validated_data.pop('items')

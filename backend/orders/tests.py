@@ -1,6 +1,7 @@
 import datetime
 
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework.test import APITestCase
 
 from accounts.models import Account
@@ -101,3 +102,45 @@ class OrderTests(APITestCase):
         self.client.force_authenticate(self.admin)
         r = self.client.post(reverse('order-menu-item-list'), {'name': 'コーヒー'})
         self.assertEqual(r.status_code, 201, r.data)
+
+    def _set_window_around_now(self, before_hours=1, after_hours=1):
+        now = timezone.localtime()
+        settings_obj = OrderSettings.load()
+        settings_obj.accept_start_time = (now - datetime.timedelta(hours=before_hours)).time()
+        settings_obj.accept_end_time = (now + datetime.timedelta(hours=after_hours)).time()
+        settings_obj.save()
+
+    def test_order_with_requested_time_within_window(self):
+        self._set_window_around_now()
+        self.client.force_authenticate(self.user)
+        requested = timezone.now() + datetime.timedelta(minutes=30)
+        r = self.client.post(
+            reverse('orders'), {**self.order_payload(), 'requested_at': requested.isoformat()}, format='json',
+        )
+        self.assertEqual(r.status_code, 201, r.data)
+        self.assertIsNotNone(Order.objects.get(pk=r.data['id']).requested_at)
+
+    def test_order_without_requested_time_is_immediate(self):
+        self.client.force_authenticate(self.user)
+        r = self.client.post(reverse('orders'), self.order_payload(), format='json')
+        self.assertEqual(r.status_code, 201, r.data)
+        self.assertIsNone(r.data['requested_at'])
+
+    def test_requested_time_in_past_rejected(self):
+        self.client.force_authenticate(self.user)
+        requested = timezone.now() - datetime.timedelta(minutes=5)
+        r = self.client.post(
+            reverse('orders'), {**self.order_payload(), 'requested_at': requested.isoformat()}, format='json',
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertIn('requested_at', r.data)
+
+    def test_requested_time_outside_window_rejected(self):
+        self._set_window_around_now()
+        self.client.force_authenticate(self.user)
+        requested = timezone.now() + datetime.timedelta(hours=2)
+        r = self.client.post(
+            reverse('orders'), {**self.order_payload(), 'requested_at': requested.isoformat()}, format='json',
+        )
+        self.assertEqual(r.status_code, 400)
+        self.assertIn('requested_at', r.data)

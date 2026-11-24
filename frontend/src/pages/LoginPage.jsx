@@ -37,7 +37,7 @@ export default function LoginPage({ portal = 'member' }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (isAuthenticated) {
-    const from = location.state?.from?.pathname || '/'
+    const from = location.state?.from?.pathname || '/top'
     return <Navigate to={from} replace />
   }
 
@@ -47,7 +47,8 @@ export default function LoginPage({ portal = 'member' }) {
     setIsSubmitting(true)
     try {
       await login(email, password, portal)
-      navigate('/', { replace: true })
+      // ログイン直後は全ユーザー共通で「トップ」画面を表示する
+      navigate('/top', { replace: true })
     } catch {
       setError(t('メールアドレスまたはパスワードが正しくありません。'))
     } finally {

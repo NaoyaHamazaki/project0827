@@ -77,3 +77,103 @@
 .order-list__status-menu button:hover {
   background-color: var(--color-surface-muted);
 }
+
+/* 時間指定の注文：注文内容の下に指定時刻を目立たせて表示し、行全体にも色を付ける */
+.order-list__scheduled {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-warning-text);
+  color: var(--color-surface);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.order-list__table .order-list__row--scheduled {
+  background-color: var(--color-warning-bg);
+}
+
+.order-list__table .order-list__row--scheduled td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-warning-text);
+}
+
+/* スマホ幅：横スクロールさせず、1件を3列のカードで表示する（PCは従来の表のまま） */
+@media (max-width: 640px) {
+  .order-list__table {
+    overflow-x: visible;
+    border: none;
+    background: none;
+  }
+
+  .order-list__table .data-table,
+  .order-list__table .data-table tbody {
+    display: block;
+  }
+
+  .order-list__table .data-table thead {
+    display: none;
+  }
+
+  .order-list__table .data-table tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) auto;
+    grid-template-areas:
+      'room content status'
+      'requester content status'
+      'created content status';
+    gap: 2px var(--space-3);
+    align-items: start;
+    margin-bottom: var(--space-2);
+    padding: var(--space-3);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .order-list__table .data-table tbody tr.order-list__row--scheduled {
+    background-color: var(--color-warning-bg);
+    border-color: var(--color-warning-text);
+  }
+
+  .order-list__table .data-table tbody td {
+    padding: 0;
+    border: none;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    box-shadow: none;
+  }
+
+  .order-list__table .order-list__cell--room {
+    grid-area: room;
+    font-weight: 700;
+  }
+
+  .order-list__table .order-list__cell--requester {
+    grid-area: requester;
+    font-size: 12px;
+  }
+
+  .order-list__table .order-list__cell--created {
+    grid-area: created;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .order-list__table .order-list__cell--content {
+    grid-area: content;
+    font-size: 13px;
+  }
+
+  .order-list__table .order-list__cell--status {
+    grid-area: status;
+  }
+
+  .order-list__table .order-list__status-menu {
+    left: auto;
+    right: 0;
+  }
+}

@@ -36,13 +36,17 @@
   gap: var(--space-5);
 }
 
+/* 有効な受付手段が1〜2個のときも左に寄らないよう、中央ぞろえで並べる（1枚の幅は3列時と同じ） */
 .scan-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-3);
 }
 
 .scan-tile {
+  flex: 0 0 calc((100% - 2 * var(--space-3)) / 3);
+  min-width: 0;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;

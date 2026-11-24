@@ -183,3 +183,65 @@
   font-size: 13px;
   line-height: 1.6;
 }
+
+.order-page__time {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+.order-page__time select {
+  flex: 0 1 200px;
+  min-width: 0;
+}
+
+.order-page__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.order-page__confirm-time {
+  margin: 0;
+  font-size: 14px;
+}
+
+.order-page__confirm-time.is-scheduled {
+  font-weight: 700;
+  color: var(--color-warning-text);
+}
+
+/* スマホ縦（iPhone等）では、会議室・メニューのカードを3列ずつ並べる */
+@media (max-width: 640px) {
+  .order-page__section {
+    padding: var(--space-4);
+  }
+
+  .order-page__card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .order-page__room-card,
+  .order-page__menu-card-btn {
+    width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .order-page__menu-card-btn {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+
+  .order-page__stepper {
+    gap: var(--space-2);
+    padding: 3px 6px;
+  }
+
+  .order-page__empty {
+    grid-column: 1 / -1;
+  }
+}
