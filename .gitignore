@@ -21,3 +21,9 @@ Thumbs.db
 
 # Claude Code project-local config
 .claude/
+
+# 提案資料（先方名・料金を含むため公開しない）
+提案資料/
+
+# 提案資料用の画像（先方名を含む場合があるため公開しない）
+data/
