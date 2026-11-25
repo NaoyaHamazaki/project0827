@@ -29,6 +29,7 @@ export const en = {
   'いいね': 'Like',
   '太字': 'Bold',
   'Enterで送信 / Shift+Enterで改行': 'Enter to send / Shift+Enter for newline',
+  '改行はEnter / 送信は送信ボタン': 'Enter for newline / tap Send to send',
   'メッセージを入力': 'Type a message',
   '送信': 'Send',
 

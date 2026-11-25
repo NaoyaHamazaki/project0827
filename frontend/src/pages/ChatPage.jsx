@@ -12,6 +12,12 @@ import './ChatPage.css'
 const POLL_MS = 3000
 
 // **太字** だけを解釈する。HTMLは一切挿入せずReact要素として描画するのでXSSにならない
+// スマホ・タブレット（指で操作する端末）では Enter を改行にし、送信はボタンで行う
+const isTouchDevice = () => typeof window !== 'undefined'
+  && window.matchMedia?.('(pointer: coarse)').matches
+
+const TEXTAREA_MAX_HEIGHT = 160
+
 function renderBody(body) {
   return body.split(/(\*\*[^*\n]+\*\*)/g).map((part, i) => (
     /^\*\*[^*\n]+\*\*$/.test(part)
@@ -189,9 +195,21 @@ function Thread({ conversation, onBack, onSent }) {
     }
   }
 
+  // 入力に合わせて入力欄の高さを広げる（上限を超えたら欄の中でスクロール）
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, TEXTAREA_MAX_HEIGHT)}px`
+  }, [draft])
+
+  const touch = isTouchDevice()
+
   const handleKeyDown = (event) => {
-    // 日本語入力の変換確定のEnterでは送信しない
-    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+    // 日本語入力の変換確定のEnterでは送信しない（Safariは isComposing が false になるため keyCode 229 も見る）
+    const composing = event.nativeEvent.isComposing || event.keyCode === 229
+    // PC: Enterで送信 / Shift+Enterで改行。スマホ: Enterは改行（送信はボタン）
+    if (event.key === 'Enter' && !event.shiftKey && !composing && !touch) {
       event.preventDefault()
       submit()
     }
@@ -255,7 +273,9 @@ function Thread({ conversation, onBack, onSent }) {
           <button type="button" onClick={applyBold} aria-label={t('太字')} title={`${t('太字')} (Ctrl+B)`}>
             <Bold size={15} />
           </button>
-          <span className="chat__hint">{t('Enterで送信 / Shift+Enterで改行')}</span>
+          <span className="chat__hint">
+            {touch ? t('改行はEnter / 送信は送信ボタン') : t('Enterで送信 / Shift+Enterで改行')}
+          </span>
         </div>
         <div className="chat__input-row">
           <textarea

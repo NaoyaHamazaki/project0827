@@ -38,7 +38,7 @@
 .chat__toolbar button { background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 4px 8px; color: var(--color-text); cursor: pointer; }
 .chat__hint { font-size: 11px; color: var(--color-text-faint); }
 .chat__input-row { display: flex; gap: 8px; align-items: flex-end; }
-.chat__input-row textarea { flex: 1; resize: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 8px 10px; font: inherit; font-size: 14px; background: var(--color-surface); color: var(--color-text); }
+.chat__input-row textarea { flex: 1; resize: none; max-height: 160px; overflow-y: auto; line-height: 1.5; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 8px 10px; font: inherit; font-size: 14px; background: var(--color-surface); color: var(--color-text); }
 .chat__send { height: 40px; }
 .chat__error { margin: 0 0 6px; font-size: 12px; color: var(--color-danger); }
 
