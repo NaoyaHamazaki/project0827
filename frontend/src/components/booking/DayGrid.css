@@ -1,0 +1,175 @@
+/* 日別ビュー：見出し行と時刻列は固定し、本体だけ上下・左右にスクロールする。
+   高さは 9 時間分（9:00〜18:00）＋見出し行を初期表示の目安にする */
+.day-grid {
+  --day-grid-time-w: 56px;
+  --day-grid-col-min: 110px;
+  --day-grid-head-h: 40px;
+  position: relative;
+  max-height: calc(var(--day-grid-head-h) + 48px * 9 + 2px);
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  overscroll-behavior: contain;
+}
+
+.day-grid__head,
+.day-grid__body {
+  display: grid;
+  grid-template-columns: var(--day-grid-time-w) repeat(var(--day-grid-cols), minmax(var(--day-grid-col-min), 1fr));
+  min-width: calc(var(--day-grid-time-w) + var(--day-grid-cols) * var(--day-grid-col-min));
+}
+
+.day-grid__head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: var(--day-grid-head-h);
+  background-color: var(--color-surface-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.day-grid__corner {
+  position: sticky;
+  left: 0;
+  background-color: var(--color-surface-muted);
+  border-right: 1px solid var(--color-border);
+}
+
+.day-grid__room-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-grid__body {
+  position: relative;
+}
+
+.day-grid__times {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+}
+
+.day-grid__time {
+  position: relative;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-grid__time span {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+}
+
+.day-grid__col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+}
+
+.day-grid__cell {
+  flex: none;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.day-grid__cell:hover:not(:disabled) {
+  background-color: var(--color-primary-soft);
+}
+
+.day-grid__cell:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.day-grid__cell.is-past {
+  background-color: var(--color-surface-muted);
+  cursor: default;
+}
+
+.day-grid__chip {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  overflow: hidden;
+}
+
+.day-grid__chip span,
+.day-grid__chip strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-grid__chip.is-mine {
+  background-color: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+}
+
+.day-grid__chip.is-other {
+  background-color: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.day-grid__chip.is-other:not(:disabled) {
+  cursor: pointer;
+}
+
+.day-grid__chip:disabled {
+  cursor: default;
+}
+
+.day-grid__chip-note {
+  opacity: 0.85;
+}
+
+.day-grid__now {
+  position: absolute;
+  left: var(--day-grid-time-w);
+  right: 0;
+  z-index: 2;
+  height: 2px;
+  background-color: var(--color-danger);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .day-grid {
+    --day-grid-time-w: 48px;
+    --day-grid-col-min: 96px;
+  }
+}

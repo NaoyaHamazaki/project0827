@@ -58,3 +58,13 @@ export async function saveFloorPlanItems(items) {
   const { data } = await client.put('/meeting-rooms/floor-plan-items/', items)
   return data
 }
+
+export async function fetchReservationsDay(date) {
+  const { data } = await client.get('/meeting-rooms/reservations/day/', { params: { date } })
+  return data
+}
+
+export async function updateReservation(id, payload) {
+  const { data } = await client.patch(`/meeting-rooms/reservations/${id}/`, payload)
+  return data
+}

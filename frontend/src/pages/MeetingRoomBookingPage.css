@@ -1,39 +1,197 @@
-.meeting-room-booking-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-
-.meeting-room-booking-page__card {
+.booking-page {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: var(--space-3);
-  text-align: center;
-  max-width: 360px;
-  padding: var(--space-6);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.booking-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.booking-page__header h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.booking-page__hint {
+  margin: 0;
+  font-size: 12px;
   color: var(--color-text-muted);
 }
 
-.meeting-room-booking-page__card h1 {
+.booking-page__empty {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text);
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--color-text-faint);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
 }
 
-.meeting-room-booking-page__card p {
+/* タブ（カレンダー / フロアマップ） */
+.booking-tabs {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.booking-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.booking-tabs__tab.is-active {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+/* 日付の切り替え */
+.booking-date-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.booking-date-nav .btn {
+  padding: 6px 10px;
+}
+
+.booking-date-nav__date {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+/* 日付表示をタップするとカレンダーが開く（入力欄自体は透明にして重ねる） */
+.booking-date-nav__date input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* フロアマップ */
+.booking-floor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.booking-floor .floor-plan-canvas {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.booking-floor__legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.booking-floor__legend button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.booking-floor__legend button:hover {
+  border-color: var(--color-primary);
+}
+
+.booking-floor__legend span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.booking-floor__day .day-grid {
+  --day-grid-col-min: 160px;
+}
+
+/* 予約フォーム */
+.booking-form__times {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.booking-form__times .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-form__tilde {
+  padding-bottom: 10px;
+  color: var(--color-text-muted);
+}
+
+.booking-form__owner {
   margin: 0;
   font-size: 13px;
-  line-height: 1.6;
+  color: var(--color-text-muted);
 }
 
-.meeting-room-booking-page__card .btn {
-  margin-top: var(--space-2);
+.booking-form__actions {
+  flex-wrap: wrap;
+}
+
+.booking-form__cancel-reservation {
+  margin-right: auto;
+  color: var(--color-danger);
+}
+
+.booking-form__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-danger-bg);
+}
+
+.booking-form__confirm p {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-danger);
 }
 
 .meeting-room-booking-page__error {
