@@ -1,0 +1,422 @@
+.insights {
+  --insights-seq-1: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+  --insights-seq-2: color-mix(in srgb, var(--color-primary) 30%, var(--color-surface));
+  --insights-seq-3: color-mix(in srgb, var(--color-primary) 50%, var(--color-surface));
+  --insights-seq-4: color-mix(in srgb, var(--color-primary) 72%, var(--color-surface));
+  --insights-seq-5: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.insights__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.insights__header h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.insights__header p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.insights__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.insights__month {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.insights__month .btn {
+  padding: 6px 10px;
+}
+
+.insights__month-label {
+  min-width: 7.5em;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.insights__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  transition: opacity var(--transition-fast);
+}
+
+.insights__body.is-loading {
+  opacity: 0.55;
+}
+
+/* 数字のタイル */
+.insights__tiles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.insights__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.insights__tile span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.insights__tile strong {
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.insights__tile small {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* セクション */
+.insights__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.insights__section-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.insights__section-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.insights__empty {
+  margin: 0;
+  padding: var(--space-4);
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-faint);
+}
+
+.insights__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+/* C: ランキング */
+.insights__alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.insights__alert svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.insights__table-wrap {
+  overflow-x: auto;
+}
+
+.insights__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.insights__table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.insights__table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.insights__table tr:last-child td {
+  border-bottom: none;
+}
+
+.insights__table .is-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.insights__table tr.is-near-limit {
+  background-color: var(--color-warning-bg);
+}
+
+.insights__member {
+  font-weight: 700;
+}
+
+.insights__sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.insights__ratio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 180px;
+}
+
+.insights__ratio-track {
+  flex: 1;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.insights__ratio-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+}
+
+.insights__ratio-fill.is-warning {
+  background-color: var(--color-warning-text);
+}
+
+.insights__ratio-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.is-near-limit .insights__ratio-text {
+  color: var(--color-warning-text);
+  font-weight: 700;
+}
+
+/* E: ヒートマップ */
+.insights__heat-wrap {
+  overflow-x: auto;
+}
+
+.insights__heat {
+  border-collapse: separate;
+  border-spacing: 2px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.insights__heat th {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0 4px;
+}
+
+.insights__heat thead th {
+  text-align: center;
+}
+
+.insights__heat td {
+  padding: 0;
+}
+
+.insights__heat-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  border-radius: 4px;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text);
+}
+
+.insights__heat-cell.is-step-1 { background-color: var(--insights-seq-1); }
+.insights__heat-cell.is-step-2 { background-color: var(--insights-seq-2); }
+.insights__heat-cell.is-step-3 { background-color: var(--insights-seq-3); color: #fff; }
+.insights__heat-cell.is-step-4 { background-color: var(--insights-seq-4); color: #fff; }
+.insights__heat-cell.is-step-5 { background-color: var(--insights-seq-5); color: #fff; }
+
+.insights__heat-legend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.insights__heat-legend .insights__heat-cell {
+  width: 18px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+/* F・G: 横棒 */
+.insights__hbars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.insights__hbars li {
+  display: grid;
+  grid-template-columns: minmax(70px, 8em) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+}
+
+.insights__hbar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insights__hbar-track {
+  height: 14px;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--color-surface-muted);
+  overflow: hidden;
+}
+
+.insights__hbar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--color-primary);
+}
+
+.insights__hbar-value {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* H: 縦棒（月別） */
+.insights__columns {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  height: 160px;
+  padding-top: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.insights__column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+
+.insights__column-value {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-height: 16px;
+}
+
+.insights__column-bar {
+  display: block;
+  width: min(28px, 70%);
+  min-height: 0;
+  border-radius: 4px 4px 0 0;
+  background-color: var(--color-primary);
+}
+
+.insights__column-label {
+  position: absolute;
+  bottom: -20px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.insights__section:has(.insights__columns) {
+  padding-bottom: calc(var(--space-4) + 18px);
+}
+
+@media (max-width: 900px) {
+  .insights__tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .insights__pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .insights__tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .insights__section {
+    padding: var(--space-3);
+  }
+
+  .insights__columns {
+    gap: 3px;
+  }
+}

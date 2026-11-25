@@ -89,3 +89,10 @@ export async function fetchMemberTree() {
   const { data } = await client.get('/members/tree/')
   return data
 }
+
+export async function fetchMemberInsights({ year, month, site }) {
+  const params = { year, month }
+  if (site) params.site = site
+  const { data } = await client.get('/members/insights/', { params })
+  return data
+}

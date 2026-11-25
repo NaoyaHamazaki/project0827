@@ -18,6 +18,9 @@
 }
 
 .layout__brand {
+  display: block;
+  color: inherit;
+  text-decoration: none;
   font-size: 17px;
   font-weight: 700;
   padding: 0 var(--space-3);

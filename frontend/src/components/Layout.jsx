@@ -112,7 +112,7 @@ export default function Layout() {
     <div className="layout">
       <aside className="layout__sidebar">
         <div className="layout__sidebar-top">
-          <div className="layout__brand">{t('受付システム')}</div>
+          <NavLink to="/top" className="layout__brand" aria-label={t('トップへ戻る')}>{t('受付システム')}</NavLink>
           <button
             type="button"
             className="layout__menu-toggle"

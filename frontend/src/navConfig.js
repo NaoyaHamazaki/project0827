@@ -53,6 +53,7 @@ export const ADMIN_NAV_GROUPS = [
     items: [
       { to: '/members', end: true, label: '会員一覧' },
       { to: '/members/new', label: '新規会員作成' },
+      { to: '/members/insights', label: '利用状況' },
       { to: '/security-cards', label: 'セキュリティカード' },
     ],
   },

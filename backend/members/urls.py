@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     AdminMemberRegisterView, InviteRegisterView, InviteStatusView, MemberInviteCreateView,
-    MemberTreeView, MemberViewSet, MyCompanyMemberDetailView, MyCompanyMembersView, PlanViewSet,
+    MemberInsightsView, MemberTreeView, MemberViewSet, MyCompanyMemberDetailView, MyCompanyMembersView, PlanViewSet,
     PublicPlanListView,
 )
 
@@ -15,6 +15,7 @@ urlpatterns = [
     path('register/', AdminMemberRegisterView.as_view(), name='member-admin-register'),
     path('invites/', MemberInviteCreateView.as_view(), name='member-invite-create'),
     path('tree/', MemberTreeView.as_view(), name='member-tree'),
+    path('insights/', MemberInsightsView.as_view(), name='member-insights'),
     path('my-company/', MyCompanyMembersView.as_view(), name='my-company-members'),
     path('my-company/<uuid:pk>/', MyCompanyMemberDetailView.as_view(), name='my-company-member'),
     path('invites/public-plans/', PublicPlanListView.as_view(), name='member-invite-public-plans'),

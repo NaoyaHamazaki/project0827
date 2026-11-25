@@ -27,6 +27,7 @@ import SettingsAccountPage from './pages/SettingsAccountPage'
 import TableInfoPage from './pages/TableInfoPage'
 import AnnouncementsPage from './pages/AnnouncementsPage'
 import MemberCreatePage from './pages/MemberCreatePage'
+import MemberInsightsPage from './pages/MemberInsightsPage'
 import RegisterPage from './pages/RegisterPage'
 import MasterSitesPage from './pages/MasterSitesPage'
 import MyMembersPage from './pages/MyMembersPage'
@@ -79,6 +80,14 @@ export default function App() {
           element={
             <ProtectedRoute adminOnly>
               <MemberCreatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members/insights"
+          element={
+            <ProtectedRoute adminOnly>
+              <MemberInsightsPage />
             </ProtectedRoute>
           }
         />

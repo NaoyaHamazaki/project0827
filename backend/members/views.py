@@ -16,6 +16,7 @@ from .serializers import (
     AdminMemberRegisterSerializer, AdminSelfRegisterSerializer, InviteStatusSerializer, acting_site,
     MemberInviteSerializer, MemberSerializer, MemberUsageSerializer, PlanSerializer, SelfRegisterSerializer,
 )
+from .insights import build_insights
 from .usage import calculate_usage
 
 
@@ -277,3 +278,31 @@ class MemberTreeView(APIView):
             root['children'] = admin_nodes
             return Response(root)
         return Response(admin_nodes[0] if admin_nodes else _node('admin', user.username))
+
+
+class MemberInsightsView(APIView):
+    """利用状況（運営者向けダッシュボード）。?year=&month= で対象月、マスターは ?site= で所管を絞れる"""
+
+    permission_classes = (IsAdmin,)
+
+    def get(self, request):
+        now = timezone.localtime()
+        try:
+            year = int(request.query_params.get('year') or now.year)
+            month = int(request.query_params.get('month') or now.month)
+            if not 1 <= month <= 12 or not 2000 <= year <= 2100:
+                raise ValueError
+            raw_site = request.query_params.get('site')
+            requested_site = int(raw_site) if raw_site else None
+        except ValueError:
+            return Response({'detail': '年月・所管の指定が正しくありません'}, status=400)
+
+        user = request.user
+        site_id = requested_site if user.role == Account.Role.MASTER else user.site_id
+        sites = Site.objects.exclude(code=Site.MASTER_CODE).order_by('code')
+        if user.role != Account.Role.MASTER:
+            sites = sites.filter(pk=user.site_id)
+        data = build_insights(site_id, year, month)
+        data['site'] = site_id
+        data['sites'] = [{'id': s.id, 'name': s.name} for s in sites]
+        return Response(data)
