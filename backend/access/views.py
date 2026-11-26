@@ -1,15 +1,17 @@
 import csv
-from datetime import timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.db import transaction
 from django.db.models import OuterRef, Subquery
 from django.http import StreamingHttpResponse
 from django.utils import timezone
 from rest_framework import generics, status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.models import Account
 from accounts.permissions import IsAdmin
 from cards.models import CardLoan, SecurityCard
 from cards.serializers import SecurityCardSerializer
@@ -277,10 +279,12 @@ class CurrentOccupantsView(generics.ListAPIView):
 
     def get_queryset(self):
         latest_log = AccessLog.objects.filter(member=OuterRef('pk')).order_by('-created_at')
+        active_loan = CardLoan.objects.filter(member=OuterRef('pk'), returned_at__isnull=True).order_by('-issued_at')
         return (
             Member.objects.annotate(
                 latest_type=Subquery(latest_log.values('type')[:1]),
                 checked_in_at=Subquery(latest_log.values('created_at')[:1]),
+                security_card_number=Subquery(active_loan.values('security_card__card_number')[:1]),
             )
             .filter(latest_type=AccessLog.LogType.CHECK_IN)
             .order_by('-checked_in_at')
@@ -328,14 +332,125 @@ class AccessLogManualCreateView(APIView):
         log_type = serializer.validated_data['type']
         timestamp = serializer.validated_data['timestamp']
 
-        log = AccessLog.objects.create(
-            member=member, type=log_type, method=AccessLog.Method.MANUAL, scanned_by=request.user,
-        )
-        # auto_now_add は .save() 経由でのみ強制されるため、.update() で任意の日時に上書きする
-        AccessLog.objects.filter(pk=log.pk).update(created_at=timestamp)
-        log.refresh_from_db()
+        if timestamp > timezone.now() + timedelta(minutes=1):
+            return Response({'timestamp': ['未来の日時は指定できません']}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            log = AccessLog.objects.create(
+                member=member, type=log_type, method=AccessLog.Method.MANUAL, scanned_by=request.user,
+            )
+            # auto_now_add は .save() 経由でのみ強制されるため、.update() で任意の日時に上書きする
+            AccessLog.objects.filter(pk=log.pk).update(created_at=timestamp)
+            log.refresh_from_db()
+            if log_type == AccessLog.LogType.CHECK_OUT:
+                # 退室し忘れを管理者が退室扱いにした場合も、その滞在で貸し出したカードは返却済みにする
+                loan = CardLoan.objects.filter(
+                    member=member, returned_at__isnull=True, issued_at__lte=timestamp,
+                ).select_related('security_card').first()
+                if loan is not None:
+                    loan.returned_at = timestamp
+                    loan.returned_by = request.user
+                    loan.access_log_out = log
+                    loan.save(update_fields=['returned_at', 'returned_by', 'access_log_out'])
+                    loan.security_card.status = SecurityCard.Status.AVAILABLE
+                    loan.security_card.save(update_fields=['status'])
+                    log = AccessLog.objects.select_related('card_loan_returned__security_card').get(pk=log.pk)
 
         return Response(AccessLogSerializer(log).data, status=status.HTTP_201_CREATED)
+
+
+def _log_brief(log):
+    if log is None:
+        return None
+    staff = (log.scanned_by.get_full_name() or log.scanned_by.username) if log.scanned_by else None
+    return {'id': str(log.id), 'at': log.created_at, 'method': log.method, 'staff': staff}
+
+
+def _session_status(check_in, check_out, is_ongoing):
+    if is_ongoing:
+        return 'ongoing'
+    if check_out is None:
+        return 'missing_check_out'
+    if check_in is None:
+        return 'missing_check_in'
+    return 'complete'
+
+
+class AccessLogSessionListView(APIView):
+    """過去の入退室履歴を「1回の来館＝入室と退室の組」で返す（在室・ログ管理 → 過去の入退室履歴）。
+
+    ?date_from=&date_to=（入室日で絞る。入室がない組は退室日）、?member=（氏名の部分一致）、
+    ?unreturned_card=true（カード未返却のみ）、?page=。管理者は自分の所管の会員だけ
+    """
+
+    permission_classes = (IsAdmin,)
+    PAIRING_MARGIN = timedelta(days=3)  # 期間の端で入室と退室が分かれないように前後を余分に読む
+
+    def get(self, request):
+        params = request.query_params
+        try:
+            date_from = date.fromisoformat(params['date_from']) if params.get('date_from') else None
+            date_to = date.fromisoformat(params['date_to']) if params.get('date_to') else None
+        except ValueError:
+            return Response({'detail': '日付の形式が正しくありません'}, status=status.HTTP_400_BAD_REQUEST)
+
+        logs = AccessLog.objects.select_related(
+            'member', 'scanned_by', 'card_loan_issued__security_card', 'card_loan_returned__security_card',
+        )
+        user = request.user
+        if user.role == Account.Role.ADMIN and user.site_id:
+            logs = logs.filter(member__site_id=user.site_id)
+        if params.get('member'):
+            logs = logs.filter(member__name__icontains=params['member'])
+        tz = timezone.get_current_timezone()
+        if date_from:
+            logs = logs.filter(created_at__gte=datetime.combine(date_from, time.min, tz) - self.PAIRING_MARGIN)
+        if date_to:
+            day_after = datetime.combine(date_to + timedelta(days=1), time.min, tz)
+            logs = logs.filter(created_at__lt=day_after + self.PAIRING_MARGIN)
+
+        sessions = []
+        pending = {}
+        for log in logs.order_by('member_id', 'created_at'):
+            if log.type == AccessLog.LogType.CHECK_IN:
+                if log.member_id in pending:  # 退室がないまま次の入室があった
+                    sessions.append((pending.pop(log.member_id), None, False))
+                pending[log.member_id] = log
+            else:
+                sessions.append((pending.pop(log.member_id, None), log, False))
+        sessions.extend((check_in, None, True) for check_in in pending.values())  # 現在も在室中
+
+        only_unreturned = params.get('unreturned_card') in ('true', 'True', '1')
+        rows = []
+        for check_in, check_out, is_ongoing in sessions:
+            anchor = check_in or check_out
+            day = timezone.localdate(anchor.created_at)
+            if (date_from and day < date_from) or (date_to and day > date_to):
+                continue
+            loan = getattr(check_in, 'card_loan_issued', None) if check_in else None
+            if loan is None and check_out is not None:
+                loan = getattr(check_out, 'card_loan_returned', None)
+            if only_unreturned and not (loan and loan.returned_at is None):
+                continue
+            member = anchor.member
+            duration = None
+            if check_in and check_out:
+                duration = max(int((check_out.created_at - check_in.created_at).total_seconds() // 60), 0)
+            rows.append((anchor.created_at, {
+                'id': str(anchor.id),
+                'member': {'id': str(member.id), 'name': member.name, 'company_name': member.company_name},
+                'check_in': _log_brief(check_in),
+                'check_out': _log_brief(check_out),
+                'duration_minutes': duration,
+                'status': _session_status(check_in, check_out, is_ongoing),
+                'security_card_number': loan.security_card.card_number if loan else None,
+                'security_card_returned': (loan.returned_at is not None) if loan else None,
+            }))
+        rows.sort(key=lambda row: row[0], reverse=True)
+
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset([row for _, row in rows], request, view=self)
+        return paginator.get_paginated_response(page)
 
 
 class Echo:

@@ -23,6 +23,12 @@ export async function fetchLogHistory(filters = {}, page = 1) {
   return data
 }
 
+// 過去の入退室履歴（1回の来館＝入室と退室の組）
+export async function fetchLogSessions(filters = {}, page = 1) {
+  const { data } = await client.get('/logs/sessions/', { params: { ...filters, page } })
+  return data
+}
+
 export async function deleteLog(id) {
   await client.delete(`/logs/${id}/`)
 }

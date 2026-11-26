@@ -53,6 +53,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .logs-page__count {
@@ -61,39 +63,157 @@
   color: var(--color-text);
 }
 
-.logs-page__stale-warning {
+.logs-page__alerts {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.logs-page__alert {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-full);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
   font-size: 12px;
   font-weight: 700;
 }
 
-.logs-page__checkin-cell {
+.logs-page__alert--danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.logs-page__alert--warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.logs-page__elapsed {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.logs-page__stale-badge {
+.logs-page__elapsed-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.logs-page__elapsed-value.is-warning {
+  color: var(--color-warning-text);
+  font-weight: 700;
+}
+
+.logs-page__elapsed-value.is-danger {
+  color: var(--color-danger);
+  font-weight: 800;
+}
+
+.logs-page__level {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
   border-radius: var(--radius-full);
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
   font-size: 11px;
   font-weight: 700;
+  white-space: nowrap;
+  width: fit-content;
 }
 
-.logs-page__row--stale td {
+.logs-page__level--danger {
+  background-color: var(--color-danger);
+  color: #fff;
+}
+
+.logs-page__level--warning {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid color-mix(in srgb, var(--color-warning-text) 35%, transparent);
+}
+
+.logs-page__level--info {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* 要確認（24時間以上）は左に太い線を入れて一目でわかるように */
+.logs-page__row--danger td {
   background-color: var(--color-danger-bg);
+}
+
+.logs-page__row--danger td:first-child {
+  box-shadow: inset 4px 0 0 var(--color-danger);
+}
+
+.logs-page__row--warning td {
+  background-color: var(--color-warning-bg);
+}
+
+.logs-page__row--warning td:first-child {
+  box-shadow: inset 4px 0 0 var(--color-warning-text);
+}
+
+.logs-page__checkout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.logs-page__num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.logs-page__summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+  font-size: 13px;
+}
+
+.logs-page__summary dt {
+  color: var(--color-text-muted);
+}
+
+.logs-page__summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.logs-page__summary--detail {
+  margin-bottom: var(--space-4);
+}
+
+.logs-page__sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.logs-page__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.logs-page__notice {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .logs-page__loading {

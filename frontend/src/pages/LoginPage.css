@@ -130,3 +130,20 @@
 .login__switch:hover {
   color: var(--color-primary);
 }
+
+/* 管理者用ログインは、会員用と一目で区別できるよう太い濃色の枠と暗めの背景にする */
+.login--staff {
+  background: linear-gradient(160deg, #cfd5df 0%, #eef0f4 60%);
+}
+
+.login--staff .login__card {
+  max-width: 388px; /* 太い枠のぶん内側が狭くならないように */
+  border: 4px solid #1f2937;
+  border-top-width: 10px;
+}
+
+.login--staff .login__portal--staff {
+  padding: 5px 18px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}

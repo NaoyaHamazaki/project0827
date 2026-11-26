@@ -57,7 +57,7 @@ export default function LoginPage({ portal = 'member' }) {
   }
 
   return (
-    <div className="login">
+    <div className={`login login--${portal}`}>
       <form className="login__card" onSubmit={handleSubmit}>
         {LANGUAGE_TOGGLE_ENABLED && (
           <div className="login__lang-toggle" role="group" aria-label="Language">

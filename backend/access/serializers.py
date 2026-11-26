@@ -50,10 +50,11 @@ class ScanRequestSerializer(serializers.Serializer):
 
 class CurrentOccupantSerializer(serializers.ModelSerializer):
     checked_in_at = serializers.DateTimeField()
+    security_card_number = serializers.CharField(allow_null=True, read_only=True)
 
     class Meta:
         model = Member
-        fields = ('id', 'name', 'company_name', 'checked_in_at')
+        fields = ('id', 'name', 'company_name', 'checked_in_at', 'security_card_number')
 
 
 class QrTokenRequestSerializer(serializers.Serializer):
